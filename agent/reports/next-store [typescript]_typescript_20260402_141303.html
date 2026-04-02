@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Review Report — next-store [typescript]</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+
+  .header {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-bottom: 1px solid #334155;
+    padding: 32px 40px;
+  }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .repo-name { font-size: 28px; font-weight: 700; color: #f1f5f9; }
+  .repo-meta { font-size: 13px; color: #64748b; margin-top: 4px; }
+  .scan-time { font-size: 12px; color: #475569; text-align: right; }
+  .lang-badge {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: #1e40af; color: #bfdbfe; font-size: 12px; font-weight: 600;
+    margin-top: 8px;
+  }
+
+  .summary-cards {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    padding: 24px 40px;
+    background: #0f1117;
+  }
+  .card {
+    background: #1e293b; border-radius: 12px; padding: 20px 24px;
+    border: 1px solid #334155; text-align: center;
+    transition: transform 0.2s;
+  }
+  .card:hover { transform: translateY(-2px); }
+  .card-count { font-size: 36px; font-weight: 700; }
+  .card-label { font-size: 12px; color: #94a3b8; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .card.critical .card-count { color: #ef4444; }
+  .card.high .card-count { color: #f97316; }
+  .card.medium .card-count { color: #eab308; }
+  .card.low .card-count { color: #22c55e; }
+
+  .main { padding: 24px 40px; }
+
+  .ai-summary {
+    background: #1e293b; border: 1px solid #334155; border-radius: 12px;
+    padding: 24px; margin-bottom: 24px;
+    border-left: 4px solid #6366f1;
+  }
+  .ai-summary h2 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #a5b4fc; }
+  .ai-content { font-size: 14px; line-height: 1.7; color: #cbd5e1; }
+
+  .controls {
+    display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-btn {
+    padding: 7px 16px; border-radius: 8px; border: 1px solid #334155;
+    background: #1e293b; color: #94a3b8; font-size: 13px; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: #6366f1; color: #fff; border-color: #6366f1;
+  }
+  .search-box {
+    padding: 7px 14px; border-radius: 8px; border: 1px solid #334155;
+    background: #1e293b; color: #e2e8f0; font-size: 13px;
+    font-family: 'Inter', sans-serif; outline: none; min-width: 220px;
+    margin-left: auto;
+  }
+  .search-box:focus { border-color: #6366f1; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 12px 16px; text-align: left; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;
+    background: #1e293b; border-bottom: 1px solid #334155;
+  }
+  .finding-row td {
+    padding: 14px 16px; border-bottom: 1px solid #1e293b;
+    vertical-align: top; font-size: 14px;
+  }
+  .finding-row:hover td { background: #1e293b; }
+  .finding-row.hidden { display: none; }
+
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 6px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+  }
+  .badge.critical { background: #450a0a; color: #fca5a5; }
+  .badge.high { background: #431407; color: #fdba74; }
+  .badge.medium { background: #422006; color: #fde68a; }
+  .badge.low { background: #052e16; color: #86efac; }
+
+  .finding-title { font-weight: 500; color: #e2e8f0; }
+  .finding-detail { margin-top: 10px; padding: 12px; background: #0f172a; border-radius: 8px; }
+  .desc { color: #94a3b8; font-size: 13px; line-height: 1.6; margin-bottom: 8px; }
+  .fix { color: #86efac; font-size: 13px; line-height: 1.6; }
+  .file-cell code {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: #7dd3fc; background: #0f172a; padding: 2px 6px; border-radius: 4px;
+  }
+
+  .expand-btn {
+    padding: 4px 10px; border-radius: 6px; border: 1px solid #334155;
+    background: transparent; color: #64748b; font-size: 12px; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all 0.15s; white-space: nowrap;
+  }
+  .expand-btn:hover { border-color: #6366f1; color: #a5b4fc; }
+  .expand-btn.open { color: #6366f1; border-color: #6366f1; }
+
+  .table-container {
+    background: #1a2234; border: 1px solid #334155; border-radius: 12px; overflow: hidden;
+  }
+
+  .footer {
+    text-align: center; padding: 24px; color: #475569; font-size: 12px;
+    border-top: 1px solid #1e293b; margin-top: 40px;
+  }
+
+  .export-btn {
+    padding: 7px 16px; border-radius: 8px; border: 1px solid #334155;
+    background: #1e293b; color: #94a3b8; font-size: 13px; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all 0.15s;
+  }
+  .export-btn:hover { background: #0f172a; color: #e2e8f0; }
+
+  .no-findings {
+    text-align: center; padding: 60px; color: #475569; font-size: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="repo-name">📘 next-store [typescript]</div>
+      <div class="repo-meta">C:/Users/dicky/projects/next-store</div>
+      <div class="lang-badge">TYPESCRIPT</div>
+    </div>
+    <div class="scan-time">
+      🕐 Scanned: 2026-04-02 14:13<br>
+      🤖 AI Coding Agent
+    </div>
+  </div>
+</div>
+
+<div class="summary-cards">
+  <div class="card critical">
+    <div class="card-count">0</div>
+    <div class="card-label">🔴 Critical</div>
+  </div>
+  <div class="card high">
+    <div class="card-count">49</div>
+    <div class="card-label">🟠 High</div>
+  </div>
+  <div class="card medium">
+    <div class="card-count">74</div>
+    <div class="card-label">🟡 Medium</div>
+  </div>
+  <div class="card low">
+    <div class="card-count">19</div>
+    <div class="card-label">🟢 Low</div>
+  </div>
+</div>
+
+<div class="main">
+  
+        <div class="ai-summary">
+            <h2>🧠 AI Analysis</h2>
+            <div class="ai-content">**Code Review Summary (142 findings)**<br><br>**Critical Issues (49 high):** Direct state mutations in review-list.tsx risk React re-render failures. Missing useEffect dependencies cause stale closures and potential memory leaks. Unhandled async operations in page.tsx can crash the app silently.<br><br>**Performance Concerns (74 medium):** Multiple missing Suspense boundaries prevent proper loading states for async components. Array indices as React keys in cart-table.tsx cause inefficient re-renders and potential state bugs during list updates.<br><br>**Type Safety (19 low):** Untyped prop spreading in main-nav.tsx reduces TypeScript benefits and IDE support.<br><br>**Recommendations:** Fix state mutations, add error boundaries, implement proper React keys, and strengthen TypeScript usage.</div>
+        </div>
+
+  <div class="controls">
+    <button class="filter-btn active" onclick="filterSeverity('all', this)">All (142)</button>
+    <button class="filter-btn" onclick="filterSeverity('critical', this)">Critical (0)</button>
+    <button class="filter-btn" onclick="filterSeverity('high', this)">High (49)</button>
+    <button class="filter-btn" onclick="filterSeverity('medium', this)">Medium (74)</button>
+    <button class="filter-btn" onclick="filterSeverity('low', this)">Low (19)</button>
+    <button class="export-btn" onclick="exportCSV()">📥 Export CSV</button>
+    <input class="search-box" type="text" placeholder="🔍 Search findings..." oninput="searchFindings(this.value)">
+  </div>
+
+  <div class="table-container">
+    <table><thead><tr><th>Severity</th><th>Category</th><th>Finding</th><th>File</th><th></th></tr></thead><tbody>
+        <tr class="finding-row" data-severity="high" data-category="hooks">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 hooks</td>
+            <td class="title-cell">
+                <div class="finding-title">Direct state mutation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Directly mutating state object 'reviews' doesn't trigger a re-render and causes subtle bugs.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use the setter function with a new object: setReviews(prev => ({...prev, field: value}))</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>review-list.tsx:47</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="hooks">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 hooks</td>
+            <td class="title-cell">
+                <div class="finding-title">useEffect missing dependency array</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>review-list.tsx:30</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:36</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>route.ts:5</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="hooks">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 hooks</td>
+            <td class="title-cell">
+                <div class="finding-title">useEffect missing dependency array</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>admin-search.tsx:18</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="hooks">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 hooks</td>
+            <td class="title-cell">
+                <div class="finding-title">useEffect missing dependency array</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>deal-countdown.tsx:34</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="hooks">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 hooks</td>
+            <td class="title-cell">
+                <div class="finding-title">useEffect missing dependency array</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>mode-toggle.tsx:19</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="hooks">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 hooks</td>
+            <td class="title-cell">
+                <div class="finding-title">useEffect missing dependency array</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>carousel.tsx:101</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="hooks">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 hooks</td>
+            <td class="title-cell">
+                <div class="finding-title">useEffect missing dependency array</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>carousel.tsx:109</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>seed.ts:4</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="hooks">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 hooks</td>
+            <td class="title-cell">
+                <div class="finding-title">useEffect missing dependency array</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>use-toast.ts:171</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>cart.actions.ts:125</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>cart.actions.ts:154</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:310</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:349</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:18</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:107</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:122</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:162</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:210</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:277</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:310</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:349</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product.actions.ts:11</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product.actions.ts:21</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product.actions.ts:28</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product.actions.ts:37</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product.actions.ts:193</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product.actions.ts:11</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product.actions.ts:21</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product.actions.ts:28</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product.actions.ts:37</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product.actions.ts:183</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product.actions.ts:193</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>review.actions.ts:109</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>review.actions.ts:88</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>review.actions.ts:109</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>user.actions.ts:161</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="nextjs">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without input validation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Validate input with Zod before processing: const data = schema.parse(formData)</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>user.actions.ts:192</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>auth-guard.ts:4</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>paypal.ts:5</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>paypal.ts:9</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>paypal.ts:30</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>paypal.ts:34</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>paypal.ts:46</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>paypal.ts:52</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>paypal.ts:65</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="typescript">
+            <td><span class="badge high">HIGH</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">Explicit 'any' type usage</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Using 'any' defeats TypeScript's type safety. It spreads unsafety to all callers and disables autocomplete.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use 'unknown' for truly unknown types (requires type narrowing), or define a specific interface/type.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>utils.ts:22</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="high" data-category="pattern">
+            <td><span class="badge high">HIGH</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without error handling</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>middleware.ts:4</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:27</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:27</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="pattern">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Array index used as key prop</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use a stable unique identifier: key={item.id} or key={item.slug}</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>cart-table.tsx:50</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:9</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="pattern">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Array index used as key prop</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use a stable unique identifier: key={item.id} or key={item.slug}</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order-details-table.tsx:190</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:20</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:23</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:17</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:12</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:13</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:12</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:17</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="pattern">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Array index used as key prop</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use a stable unique identifier: key={item.id} or key={item.slug}</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:89</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:28</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:29</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:34</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="typescript">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">Non-null assertion operator (!)</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">The ! operator tells TypeScript to ignore null/undefined. If the value is actually null, you get a runtime crash.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use optional chaining (?.) with a fallback: value?.property ?? defaultValue</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:87</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:17</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:20</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:23</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="pattern">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Array index used as key prop</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use a stable unique identifier: key={item.id} or key={item.slug}</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>review-form.tsx:155</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:116</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:125</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:15</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:19</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:28</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="pattern">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Array index used as key prop</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use a stable unique identifier: key={item.id} or key={item.slug}</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>main-nav.tsx:38</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:27</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:32</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:24</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:25</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:31</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:17</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:29</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:17</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:30</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="typescript">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">Unsafe type assertion (as)</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Direct type assertion bypasses TypeScript's type checker. If the actual runtime type doesn't match, you get silent corruption.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use a type guard function or parse with zod/valibot for runtime validation before asserting the type.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>route.ts:9</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="pattern">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Array index used as key prop</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use a stable unique identifier: key={item.id} or key={item.slug}</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>main-nav.tsx:30</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:24</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Async operation without Suspense boundary</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Async Server Components without Suspense block the entire page from rendering until data loads.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>page.tsx:11</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="typescript">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">Non-null assertion operator (!)</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">The ! operator tells TypeScript to ignore null/undefined. If the value is actually null, you get a runtime crash.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use optional chaining (?.) with a fallback: value?.property ?? defaultValue</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>auth.ts:81</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="typescript">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">Unsafe type assertion (as)</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Direct type assertion bypasses TypeScript's type checker. If the actual runtime type doesn't match, you get silent corruption.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use a type guard function or parse with zod/valibot for runtime validation before asserting the type.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product-form.tsx:47</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="pattern">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Component file too large</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">This component has 373 non-empty lines. Large components are hard to test, understand, and maintain.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Split into smaller focused components. Extract hooks into custom hooks. Aim for components under 200 lines.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product-form.tsx:1</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="pattern">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Array index used as key prop</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use a stable unique identifier: key={item.id} or key={item.slug}</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product-form.tsx:268</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="pattern">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Array index used as key prop</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use a stable unique identifier: key={item.id} or key={item.slug}</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>product-images.tsx:29</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Hardcoded URL instead of environment variable</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Hardcoded URLs break when deploying to different environments (dev/staging/prod) and expose internal infrastructure.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use environment variables: process.env.NEXT_PUBLIC_API_URL. Add to .env.local and .env.example.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>rating.tsx:4</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Hardcoded URL instead of environment variable</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Hardcoded URLs break when deploying to different environments (dev/staging/prod) and expose internal infrastructure.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use environment variables: process.env.NEXT_PUBLIC_API_URL. Add to .env.local and .env.example.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>rating.tsx:13</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Hardcoded URL instead of environment variable</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Hardcoded URLs break when deploying to different environments (dev/staging/prod) and expose internal infrastructure.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use environment variables: process.env.NEXT_PUBLIC_API_URL. Add to .env.local and .env.example.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>rating.tsx:22</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="hooks">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 hooks</td>
+            <td class="title-cell">
+                <div class="finding-title">useMemo/useCallback missing dependency array</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">useMemo and useCallback require a dependency array. Without it, memoization is disabled and runs every render.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Add a dependency array as the second argument: useMemo(() => compute(a, b), [a, b])</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>carousel.tsx:71</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="hooks">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 hooks</td>
+            <td class="title-cell">
+                <div class="finding-title">useMemo/useCallback missing dependency array</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">useMemo and useCallback require a dependency array. Without it, memoization is disabled and runs every render.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Add a dependency array as the second argument: useMemo(() => compute(a, b), [a, b])</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>carousel.tsx:80</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="hooks">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 hooks</td>
+            <td class="title-cell">
+                <div class="finding-title">useMemo/useCallback missing dependency array</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">useMemo and useCallback require a dependency array. Without it, memoization is disabled and runs every render.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Add a dependency array as the second argument: useMemo(() => compute(a, b), [a, b])</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>carousel.tsx:84</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="hooks">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 hooks</td>
+            <td class="title-cell">
+                <div class="finding-title">useMemo/useCallback missing dependency array</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">useMemo and useCallback require a dependency array. Without it, memoization is disabled and runs every render.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Add a dependency array as the second argument: useMemo(() => compute(a, b), [a, b])</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>carousel.tsx:88</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Data fetching in client component with useEffect</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">In Next.js App Router, data fetching in useEffect runs only on the client, missing SSR benefits, causing loading flashes, and duplicating requests.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Move data fetching to a Server Component (remove 'use client') or use React Query/SWR for client-side fetching with caching.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>carousel.tsx:101</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Data fetching in client component with useEffect</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">In Next.js App Router, data fetching in useEffect runs only on the client, missing SSR benefits, causing loading flashes, and duplicating requests.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Move data fetching to a Server Component (remove 'use client') or use React Query/SWR for client-side fetching with caching.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>carousel.tsx:109</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="pattern">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Array index used as key prop</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use a stable unique identifier: key={item.id} or key={item.slug}</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>toaster.tsx:20</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="pattern">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Array index used as key prop</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use a stable unique identifier: key={item.id} or key={item.slug}</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>purchase-receipt.tsx:108</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="typescript">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">Unsafe type assertion (as)</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Direct type assertion bypasses TypeScript's type checker. If the actual runtime type doesn't match, you get silent corruption.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Use a type guard function or parse with zod/valibot for runtime validation before asserting the type.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:345</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:67</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:70</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:122</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:133</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:136</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:210</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:235</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:242</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>review.actions.ts:11</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>review.actions.ts:42</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>review.actions.ts:52</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>user.actions.ts:106</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>user.actions.ts:118</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>user.actions.ts:132</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>user.actions.ts:146</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>user.actions.ts:161</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="medium" data-category="nextjs">
+            <td><span class="badge medium">MEDIUM</span></td>
+            <td>📌 nextjs</td>
+            <td class="title-cell">
+                <div class="finding-title">Server Action without cache revalidation</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Mutating data without revalidating the cache means the UI shows stale data after the action completes.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>user.actions.ts:173</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="pattern">
+            <td><span class="badge low">LOW</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Spreading props without explicit typing</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Spreading ...props passes all props including internal ones to DOM elements, causing React warnings and unexpected behavior.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Destructure only needed props: const { onClick, className, ...rest } = props</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>main-nav.tsx:28</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="pattern">
+            <td><span class="badge low">LOW</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Spreading props without explicit typing</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Spreading ...props passes all props including internal ones to DOM elements, causing React warnings and unexpected behavior.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Destructure only needed props: const { onClick, className, ...rest } = props</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>main-nav.tsx:34</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="pattern">
+            <td><span class="badge low">LOW</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Spreading props without explicit typing</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Spreading ...props passes all props including internal ones to DOM elements, causing React warnings and unexpected behavior.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Destructure only needed props: const { onClick, className, ...rest } = props</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>main-nav.tsx:20</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="pattern">
+            <td><span class="badge low">LOW</span></td>
+            <td>🏗️ pattern</td>
+            <td class="title-cell">
+                <div class="finding-title">Spreading props without explicit typing</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Spreading ...props passes all props including internal ones to DOM elements, causing React warnings and unexpected behavior.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Destructure only needed props: const { onClick, className, ...rest } = props</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>main-nav.tsx:26</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>seed.ts:15</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>view-data.ts:7</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>view-data.ts:11</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>view-data.ts:14</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>view-data.ts:15</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>view-data.ts:16</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>view-data.ts:17</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>view-data.ts:18</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>view-data.ts:19</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>view-data.ts:22</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>view-data.ts:23</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>view-data.ts:24</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>view-data.ts:27</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>view-data.ts:29</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr>
+        <tr class="finding-row" data-severity="low" data-category="typescript">
+            <td><span class="badge low">LOW</span></td>
+            <td>📌 typescript</td>
+            <td class="title-cell">
+                <div class="finding-title">console.log/warn/error left in code</div>
+                <div class="finding-detail" style="display:none">
+                    <p class="desc">Console statements left in production code leak implementation details and clutter browser devtools.</p>
+                    <p class="fix">✅ <strong>Fix:</strong> Remove debug logs. Use a proper logging library or environment-gated logging.</p>
+                </div>
+            </td>
+            <td class="file-cell"><code>order.actions.ts:272</code></td>
+            <td><button class="expand-btn" onclick="toggleDetail(this)">▼ Details</button></td>
+        </tr></tbody></table>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by <strong>AI Coding Agent</strong> · 2026-04-02 14:13 ·
+  142 findings in next-store [typescript]
+</div>
+
+<script>
+function toggleDetail(btn) {
+  const row = btn.closest('tr');
+  const detail = row.querySelector('.finding-detail');
+  const isOpen = detail.style.display !== 'none';
+  detail.style.display = isOpen ? 'none' : 'block';
+  btn.textContent = isOpen ? '▼ Details' : '▲ Hide';
+  btn.classList.toggle('open', !isOpen);
+}
+
+function filterSeverity(severity, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.finding-row').forEach(row => {
+    if (severity === 'all' || row.dataset.severity === severity) {
+      row.classList.remove('hidden');
+    } else {
+      row.classList.add('hidden');
+    }
+  });
+}
+
+function searchFindings(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.finding-row').forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.classList.toggle('hidden', q.length > 0 && !text.includes(q));
+  });
+}
+
+function exportCSV() {
+  const rows = [['Severity','Category','Title','File','Line','Description','Fix']];
+  document.querySelectorAll('.finding-row').forEach(row => {
+    const cells = row.querySelectorAll('td');
+    const sev = cells[0].textContent.trim();
+    const cat = cells[1].textContent.trim();
+    const title = row.querySelector('.finding-title').textContent.trim();
+    const file = cells[3].textContent.trim();
+    const desc = row.querySelector('.desc') ? row.querySelector('.desc').textContent.trim() : '';
+    const fix = row.querySelector('.fix') ? row.querySelector('.fix').textContent.trim() : '';
+    const line = file.includes(':') ? file.split(':')[1] : '';
+    rows.push([sev, cat, title, file, line, desc, fix]);
+  });
+  const csv = rows.map(r => r.map(c => '"' + c.replace(/"/g,'""') + '"').join(',')).join('\n');
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'next-store [typescript]_findings.csv';
+  a.click();
+}
+</script>
+</body>
+</html>
