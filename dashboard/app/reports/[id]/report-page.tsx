@@ -41,9 +41,9 @@ const CAT_ICONS: Record<string, string> = {
 function SeverityPie({ report }: { report: Report }) {
   const data = [
     { name: "Critical", value: report.critical, color: SEV_COLORS.critical },
-    { name: "High", value: report.high, color: SEV_COLORS.high },
-    { name: "Medium", value: report.medium, color: SEV_COLORS.medium },
-    { name: "Low", value: report.low, color: SEV_COLORS.low },
+    { name: "High",     value: report.high,     color: SEV_COLORS.high     },
+    { name: "Medium",   value: report.medium,   color: SEV_COLORS.medium   },
+    { name: "Low",      value: report.low,      color: SEV_COLORS.low      },
   ].filter((d) => d.value > 0);
 
   return (
@@ -51,26 +51,13 @@ function SeverityPie({ report }: { report: Report }) {
       <h3 className="text-sm font-medium text-slate-300 mb-4">By Severity</h3>
       <ResponsiveContainer width="100%" height={180}>
         <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={50}
-            outerRadius={75}
-            dataKey="value"
-            paddingAngle={2}
-          >
-            {data.map((entry, index) => (
-              <Cell key={index} fill={entry.color} />
-            ))}
+          <Pie data={data} cx="50%" cy="50%" innerRadius={50} outerRadius={75}
+            dataKey="value" paddingAngle={2}>
+            {data.map((entry, i) => <Cell key={i} fill={entry.color} />)}
           </Pie>
-          <Tooltip
-            contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8 }}
-            labelStyle={{ color: "#e2e8f0" }}
-          />
-          <Legend
-            formatter={(value) => <span className="text-slate-300 text-xs">{value}</span>}
-          />
+          <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8 }}
+            labelStyle={{ color: "#e2e8f0" }} />
+          <Legend formatter={(v) => <span className="text-slate-300 text-xs">{v}</span>} />
         </PieChart>
       </ResponsiveContainer>
     </div>
@@ -85,10 +72,7 @@ function CategoryBar({ findings }: { findings: Finding[] }) {
 
   const data = Object.entries(byCategory)
     .sort((a, b) => b[1] - a[1])
-    .map(([cat, count]) => ({
-      name: `${CAT_ICONS[cat] || "📌"} ${cat}`,
-      count,
-    }));
+    .map(([cat, count]) => ({ name: `${CAT_ICONS[cat] || "📌"} ${cat}`, count }));
 
   return (
     <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
@@ -97,10 +81,8 @@ function CategoryBar({ findings }: { findings: Finding[] }) {
         <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
           <XAxis type="number" tick={{ fill: "#64748b", fontSize: 11 }} />
           <YAxis type="category" dataKey="name" tick={{ fill: "#94a3b8", fontSize: 11 }} width={110} />
-          <Tooltip
-            contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8 }}
-            labelStyle={{ color: "#e2e8f0" }}
-          />
+          <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8 }}
+            labelStyle={{ color: "#e2e8f0" }} />
           <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} />
         </BarChart>
       </ResponsiveContainer>
@@ -114,10 +96,8 @@ function FindingRow({ finding }: { finding: Finding }) {
 
   return (
     <div className="border-b border-slate-700/50 last:border-0">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full text-left px-4 py-3 hover:bg-slate-700/30 transition-colors flex items-start gap-3"
-      >
+      <button onClick={() => setExpanded(!expanded)}
+        className="w-full text-left px-4 py-3 hover:bg-slate-700/30 transition-colors flex items-start gap-3">
         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${SEV_BG[finding.severity]} shrink-0 mt-0.5`}>
           {SEV_ICONS[finding.severity]} {finding.severity}
         </span>
@@ -136,7 +116,6 @@ function FindingRow({ finding }: { finding: Finding }) {
           {expanded ? "▲ hide" : "▼ details"}
         </span>
       </button>
-
       {expanded && (
         <div className="px-4 pb-4 ml-[88px]">
           <div className="bg-slate-900/50 rounded-lg p-3 space-y-2">
@@ -165,20 +144,30 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Filters
-  const [severityFilter, setSeverityFilter] = useState<string>("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [severityFilter, setSeverityFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    fetch(`/api/reports?id=${encodeURIComponent(id)}`)
-      .then((r) => r.json())
-      .then((data) => {
+    // Try API route first (local dev), then fall back to public folder (Vercel)
+    const tryFetch = async () => {
+      try {
+        let res = await fetch(`/api/reports?id=${encodeURIComponent(id)}`);
+        if (!res.ok) {
+          // Fallback: fetch from public/reports/ (Vercel)
+          res = await fetch(`/reports/${encodeURIComponent(id)}.json`);
+        }
+        if (!res.ok) throw new Error("Not found");
+        const data = await res.json();
         if (data.error) setError(data.error);
-        else setReport(data);
-      })
-      .catch(() => setError("Failed to load report"))
-      .finally(() => setLoading(false));
+        else setReport({ ...data, id });
+      } catch {
+        setError("Report not found");
+      } finally {
+        setLoading(false);
+      }
+    };
+    tryFetch();
   }, [id]);
 
   const categories = useMemo(() => {
@@ -219,7 +208,7 @@ export default function ReportPage() {
       <div className="text-center py-24">
         <div className="text-5xl mb-4">❌</div>
         <h2 className="text-xl font-semibold text-slate-300 mb-2">Report not found</h2>
-        <p className="text-slate-500 mb-6">{error || "This report doesn't exist"}</p>
+        <p className="text-slate-500 mb-6">{error}</p>
         <Link href="/" className="text-indigo-400 hover:underline">← Back to dashboard</Link>
       </div>
     );
@@ -229,14 +218,13 @@ export default function ReportPage() {
 
   return (
     <div>
-      {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
         <Link href="/" className="hover:text-slate-300 transition-colors">Dashboard</Link>
         <span>→</span>
         <span className="text-slate-300">{report.repo_name}</span>
       </div>
 
-      {/* Report header */}
+      {/* Header */}
       <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 mb-6">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
@@ -249,10 +237,10 @@ export default function ReportPage() {
             <p className="text-slate-400 text-sm">{formatDate(report.scanned_at)}</p>
             <p className="text-slate-500 text-xs mt-1 font-mono">{report.repo_path}</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             {(["critical", "high", "medium", "low"] as const).map((sev) => (
               <div key={sev} className="text-center">
-                <div className={`text-2xl font-bold`} style={{ color: SEV_COLORS[sev] }}>
+                <div className="text-2xl font-bold" style={{ color: SEV_COLORS[sev] }}>
                   {report[sev]}
                 </div>
                 <div className="text-xs text-slate-500 capitalize">{sev}</div>
@@ -260,8 +248,6 @@ export default function ReportPage() {
             ))}
           </div>
         </div>
-
-        {/* AI Summary */}
         {report.ai_summary && (
           <div className="mt-4 pt-4 border-t border-slate-700">
             <h3 className="text-sm font-medium text-indigo-300 mb-2">🧠 AI Analysis</h3>
@@ -281,9 +267,8 @@ export default function ReportPage() {
         </div>
       )}
 
-      {/* Findings table */}
+      {/* Findings */}
       <div className="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden">
-        {/* Table header + filters */}
         <div className="px-5 py-4 border-b border-slate-700 flex flex-wrap items-center gap-3">
           <h2 className="text-slate-200 font-semibold">
             Findings
@@ -291,61 +276,34 @@ export default function ReportPage() {
               {filteredFindings.length} / {report.total_findings}
             </span>
           </h2>
-
-          {/* Severity filter */}
-          <select
-            value={severityFilter}
-            onChange={(e) => setSeverityFilter(e.target.value)}
-            className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500"
-          >
+          <select value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)}
+            className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500">
             <option value="all">All severities</option>
             <option value="critical">🔴 Critical</option>
             <option value="high">🟠 High</option>
             <option value="medium">🟡 Medium</option>
             <option value="low">🟢 Low</option>
           </select>
-
-          {/* Category filter */}
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500"
-          >
+          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
+            className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500">
             <option value="all">All categories</option>
             {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {CAT_ICONS[cat] || "📌"} {cat}
-              </option>
+              <option key={cat} value={cat}>{CAT_ICONS[cat] || "📌"} {cat}</option>
             ))}
           </select>
-
-          {/* Search */}
-          <input
-            type="text"
-            placeholder="🔍 Search findings..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500 ml-auto w-48"
-          />
+          <input type="text" placeholder="🔍 Search findings..."
+            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500 ml-auto w-48" />
         </div>
-
-        {/* Findings list */}
         {filteredFindings.length === 0 ? (
           <div className="text-center py-12 text-slate-500">
-            {report.total_findings === 0
-              ? "✅ No issues found — clean scan!"
-              : "No findings match your filters"}
+            {report.total_findings === 0 ? "✅ No issues found — clean scan!" : "No findings match your filters"}
           </div>
         ) : (
-          <div>
-            {filteredFindings.map((finding, i) => (
-              <FindingRow key={i} finding={finding} />
-            ))}
-          </div>
+          <div>{filteredFindings.map((f, i) => <FindingRow key={i} finding={f} />)}</div>
         )}
       </div>
 
-      {/* Back link */}
       <div className="mt-6">
         <Link href="/" className="text-indigo-400 hover:text-indigo-300 transition-colors text-sm">
           ← Back to all reports

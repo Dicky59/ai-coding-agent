@@ -1,0 +1,1292 @@
+{
+  "repo_path": "C:/Users/dicky/projects/next-store",
+  "repo_name": "next-store [typescript]",
+  "language": "typescript",
+  "scanned_at": "2026-04-02T14:13:03.607535",
+  "total_findings": 142,
+  "critical": 0,
+  "high": 49,
+  "medium": 74,
+  "low": 19,
+  "ai_summary": "**Code Review Summary (142 findings)**\n\n**Critical Issues (49 high):** Direct state mutations in review-list.tsx risk React re-render failures. Missing useEffect dependencies cause stale closures and potential memory leaks. Unhandled async operations in page.tsx can crash the app silently.\n\n**Performance Concerns (74 medium):** Multiple missing Suspense boundaries prevent proper loading states for async components. Array indices as React keys in cart-table.tsx cause inefficient re-renders and potential state bugs during list updates.\n\n**Type Safety (19 low):** Untyped prop spreading in main-nav.tsx reduces TypeScript benefits and IDE support.\n\n**Recommendations:** Fix state mutations, add error boundaries, implement proper React keys, and strengthen TypeScript usage.",
+  "findings": [
+    {
+      "file": "app/(auth)/sign-in/page.tsx",
+      "line": 27,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(auth)/sign-up/page.tsx",
+      "line": 27,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/cart/cart-table.tsx",
+      "line": 50,
+      "severity": "medium",
+      "category": "pattern",
+      "title": "Array index used as key prop",
+      "description": "Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.",
+      "suggested_fix": "Use a stable unique identifier: key={item.id} or key={item.slug}"
+    },
+    {
+      "file": "app/(root)/cart/page.tsx",
+      "line": 9,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/order/[id]/order-details-table.tsx",
+      "line": 190,
+      "severity": "medium",
+      "category": "pattern",
+      "title": "Array index used as key prop",
+      "description": "Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.",
+      "suggested_fix": "Use a stable unique identifier: key={item.id} or key={item.slug}"
+    },
+    {
+      "file": "app/(root)/order/[id]/page.tsx",
+      "line": 20,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/order/[id]/page.tsx",
+      "line": 23,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/order/[id]/stripe-payment-success/page.tsx",
+      "line": 17,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/page.tsx",
+      "line": 12,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/page.tsx",
+      "line": 13,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/payment-method/page.tsx",
+      "line": 12,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/payment-method/page.tsx",
+      "line": 17,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/place-order/page.tsx",
+      "line": 89,
+      "severity": "medium",
+      "category": "pattern",
+      "title": "Array index used as key prop",
+      "description": "Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.",
+      "suggested_fix": "Use a stable unique identifier: key={item.id} or key={item.slug}"
+    },
+    {
+      "file": "app/(root)/place-order/page.tsx",
+      "line": 28,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/place-order/page.tsx",
+      "line": 29,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/place-order/page.tsx",
+      "line": 34,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/product/[slug]/page.tsx",
+      "line": 87,
+      "severity": "medium",
+      "category": "typescript",
+      "title": "Non-null assertion operator (!)",
+      "description": "The ! operator tells TypeScript to ignore null/undefined. If the value is actually null, you get a runtime crash.",
+      "suggested_fix": "Use optional chaining (?.) with a fallback: value?.property ?? defaultValue"
+    },
+    {
+      "file": "app/(root)/product/[slug]/page.tsx",
+      "line": 17,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/product/[slug]/page.tsx",
+      "line": 20,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/product/[slug]/page.tsx",
+      "line": 23,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/product/[slug]/review-form.tsx",
+      "line": 155,
+      "severity": "medium",
+      "category": "pattern",
+      "title": "Array index used as key prop",
+      "description": "Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.",
+      "suggested_fix": "Use a stable unique identifier: key={item.id} or key={item.slug}"
+    },
+    {
+      "file": "app/(root)/product/[slug]/review-list.tsx",
+      "line": 47,
+      "severity": "high",
+      "category": "hooks",
+      "title": "Direct state mutation",
+      "description": "Directly mutating state object 'reviews' doesn't trigger a re-render and causes subtle bugs.",
+      "suggested_fix": "Use the setter function with a new object: setReviews(prev => ({...prev, field: value}))"
+    },
+    {
+      "file": "app/(root)/product/[slug]/review-list.tsx",
+      "line": 30,
+      "severity": "high",
+      "category": "hooks",
+      "title": "useEffect missing dependency array",
+      "description": "useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.",
+      "suggested_fix": "Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects."
+    },
+    {
+      "file": "app/(root)/search/page.tsx",
+      "line": 36,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "app/(root)/search/page.tsx",
+      "line": 116,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/search/page.tsx",
+      "line": 125,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/shipping-address/page.tsx",
+      "line": 15,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/shipping-address/page.tsx",
+      "line": 19,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/(root)/shipping-address/page.tsx",
+      "line": 28,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/admin/main-nav.tsx",
+      "line": 28,
+      "severity": "low",
+      "category": "pattern",
+      "title": "Spreading props without explicit typing",
+      "description": "Spreading ...props passes all props including internal ones to DOM elements, causing React warnings and unexpected behavior.",
+      "suggested_fix": "Destructure only needed props: const { onClick, className, ...rest } = props"
+    },
+    {
+      "file": "app/admin/main-nav.tsx",
+      "line": 34,
+      "severity": "low",
+      "category": "pattern",
+      "title": "Spreading props without explicit typing",
+      "description": "Spreading ...props passes all props including internal ones to DOM elements, causing React warnings and unexpected behavior.",
+      "suggested_fix": "Destructure only needed props: const { onClick, className, ...rest } = props"
+    },
+    {
+      "file": "app/admin/main-nav.tsx",
+      "line": 38,
+      "severity": "medium",
+      "category": "pattern",
+      "title": "Array index used as key prop",
+      "description": "Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.",
+      "suggested_fix": "Use a stable unique identifier: key={item.id} or key={item.slug}"
+    },
+    {
+      "file": "app/admin/orders/page.tsx",
+      "line": 27,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/admin/orders/page.tsx",
+      "line": 32,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/admin/overview/page.tsx",
+      "line": 24,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/admin/overview/page.tsx",
+      "line": 25,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/admin/overview/page.tsx",
+      "line": 31,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/admin/products/[id]/page.tsx",
+      "line": 17,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/admin/products/page.tsx",
+      "line": 29,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/admin/users/[id]/page.tsx",
+      "line": 17,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/admin/users/page.tsx",
+      "line": 30,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/api/webhooks/stripe/route.ts",
+      "line": 9,
+      "severity": "medium",
+      "category": "typescript",
+      "title": "Unsafe type assertion (as)",
+      "description": "Direct type assertion bypasses TypeScript's type checker. If the actual runtime type doesn't match, you get silent corruption.",
+      "suggested_fix": "Use a type guard function or parse with zod/valibot for runtime validation before asserting the type."
+    },
+    {
+      "file": "app/api/webhooks/stripe/route.ts",
+      "line": 5,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "app/user/main-nav.tsx",
+      "line": 20,
+      "severity": "low",
+      "category": "pattern",
+      "title": "Spreading props without explicit typing",
+      "description": "Spreading ...props passes all props including internal ones to DOM elements, causing React warnings and unexpected behavior.",
+      "suggested_fix": "Destructure only needed props: const { onClick, className, ...rest } = props"
+    },
+    {
+      "file": "app/user/main-nav.tsx",
+      "line": 26,
+      "severity": "low",
+      "category": "pattern",
+      "title": "Spreading props without explicit typing",
+      "description": "Spreading ...props passes all props including internal ones to DOM elements, causing React warnings and unexpected behavior.",
+      "suggested_fix": "Destructure only needed props: const { onClick, className, ...rest } = props"
+    },
+    {
+      "file": "app/user/main-nav.tsx",
+      "line": 30,
+      "severity": "medium",
+      "category": "pattern",
+      "title": "Array index used as key prop",
+      "description": "Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.",
+      "suggested_fix": "Use a stable unique identifier: key={item.id} or key={item.slug}"
+    },
+    {
+      "file": "app/user/orders/page.tsx",
+      "line": 24,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "app/user/profile/page.tsx",
+      "line": 11,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Async operation without Suspense boundary",
+      "description": "Async Server Components without Suspense block the entire page from rendering until data loads.",
+      "suggested_fix": "Wrap async components in <Suspense fallback={<Loading />}>. Create loading.tsx for automatic loading UI."
+    },
+    {
+      "file": "auth.ts",
+      "line": 81,
+      "severity": "medium",
+      "category": "typescript",
+      "title": "Non-null assertion operator (!)",
+      "description": "The ! operator tells TypeScript to ignore null/undefined. If the value is actually null, you get a runtime crash.",
+      "suggested_fix": "Use optional chaining (?.) with a fallback: value?.property ?? defaultValue"
+    },
+    {
+      "file": "components/admin/admin-search.tsx",
+      "line": 18,
+      "severity": "high",
+      "category": "hooks",
+      "title": "useEffect missing dependency array",
+      "description": "useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.",
+      "suggested_fix": "Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects."
+    },
+    {
+      "file": "components/admin/product-form.tsx",
+      "line": 47,
+      "severity": "medium",
+      "category": "typescript",
+      "title": "Unsafe type assertion (as)",
+      "description": "Direct type assertion bypasses TypeScript's type checker. If the actual runtime type doesn't match, you get silent corruption.",
+      "suggested_fix": "Use a type guard function or parse with zod/valibot for runtime validation before asserting the type."
+    },
+    {
+      "file": "components/admin/product-form.tsx",
+      "line": 1,
+      "severity": "medium",
+      "category": "pattern",
+      "title": "Component file too large",
+      "description": "This component has 373 non-empty lines. Large components are hard to test, understand, and maintain.",
+      "suggested_fix": "Split into smaller focused components. Extract hooks into custom hooks. Aim for components under 200 lines."
+    },
+    {
+      "file": "components/admin/product-form.tsx",
+      "line": 268,
+      "severity": "medium",
+      "category": "pattern",
+      "title": "Array index used as key prop",
+      "description": "Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.",
+      "suggested_fix": "Use a stable unique identifier: key={item.id} or key={item.slug}"
+    },
+    {
+      "file": "components/deal-countdown.tsx",
+      "line": 34,
+      "severity": "high",
+      "category": "hooks",
+      "title": "useEffect missing dependency array",
+      "description": "useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.",
+      "suggested_fix": "Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects."
+    },
+    {
+      "file": "components/shared/header/mode-toggle.tsx",
+      "line": 19,
+      "severity": "high",
+      "category": "hooks",
+      "title": "useEffect missing dependency array",
+      "description": "useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.",
+      "suggested_fix": "Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects."
+    },
+    {
+      "file": "components/shared/product/product-images.tsx",
+      "line": 29,
+      "severity": "medium",
+      "category": "pattern",
+      "title": "Array index used as key prop",
+      "description": "Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.",
+      "suggested_fix": "Use a stable unique identifier: key={item.id} or key={item.slug}"
+    },
+    {
+      "file": "components/shared/product/rating.tsx",
+      "line": 4,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Hardcoded URL instead of environment variable",
+      "description": "Hardcoded URLs break when deploying to different environments (dev/staging/prod) and expose internal infrastructure.",
+      "suggested_fix": "Use environment variables: process.env.NEXT_PUBLIC_API_URL. Add to .env.local and .env.example."
+    },
+    {
+      "file": "components/shared/product/rating.tsx",
+      "line": 13,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Hardcoded URL instead of environment variable",
+      "description": "Hardcoded URLs break when deploying to different environments (dev/staging/prod) and expose internal infrastructure.",
+      "suggested_fix": "Use environment variables: process.env.NEXT_PUBLIC_API_URL. Add to .env.local and .env.example."
+    },
+    {
+      "file": "components/shared/product/rating.tsx",
+      "line": 22,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Hardcoded URL instead of environment variable",
+      "description": "Hardcoded URLs break when deploying to different environments (dev/staging/prod) and expose internal infrastructure.",
+      "suggested_fix": "Use environment variables: process.env.NEXT_PUBLIC_API_URL. Add to .env.local and .env.example."
+    },
+    {
+      "file": "components/ui/carousel.tsx",
+      "line": 71,
+      "severity": "medium",
+      "category": "hooks",
+      "title": "useMemo/useCallback missing dependency array",
+      "description": "useMemo and useCallback require a dependency array. Without it, memoization is disabled and runs every render.",
+      "suggested_fix": "Add a dependency array as the second argument: useMemo(() => compute(a, b), [a, b])"
+    },
+    {
+      "file": "components/ui/carousel.tsx",
+      "line": 80,
+      "severity": "medium",
+      "category": "hooks",
+      "title": "useMemo/useCallback missing dependency array",
+      "description": "useMemo and useCallback require a dependency array. Without it, memoization is disabled and runs every render.",
+      "suggested_fix": "Add a dependency array as the second argument: useMemo(() => compute(a, b), [a, b])"
+    },
+    {
+      "file": "components/ui/carousel.tsx",
+      "line": 84,
+      "severity": "medium",
+      "category": "hooks",
+      "title": "useMemo/useCallback missing dependency array",
+      "description": "useMemo and useCallback require a dependency array. Without it, memoization is disabled and runs every render.",
+      "suggested_fix": "Add a dependency array as the second argument: useMemo(() => compute(a, b), [a, b])"
+    },
+    {
+      "file": "components/ui/carousel.tsx",
+      "line": 88,
+      "severity": "medium",
+      "category": "hooks",
+      "title": "useMemo/useCallback missing dependency array",
+      "description": "useMemo and useCallback require a dependency array. Without it, memoization is disabled and runs every render.",
+      "suggested_fix": "Add a dependency array as the second argument: useMemo(() => compute(a, b), [a, b])"
+    },
+    {
+      "file": "components/ui/carousel.tsx",
+      "line": 101,
+      "severity": "high",
+      "category": "hooks",
+      "title": "useEffect missing dependency array",
+      "description": "useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.",
+      "suggested_fix": "Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects."
+    },
+    {
+      "file": "components/ui/carousel.tsx",
+      "line": 109,
+      "severity": "high",
+      "category": "hooks",
+      "title": "useEffect missing dependency array",
+      "description": "useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.",
+      "suggested_fix": "Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects."
+    },
+    {
+      "file": "components/ui/carousel.tsx",
+      "line": 101,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Data fetching in client component with useEffect",
+      "description": "In Next.js App Router, data fetching in useEffect runs only on the client, missing SSR benefits, causing loading flashes, and duplicating requests.",
+      "suggested_fix": "Move data fetching to a Server Component (remove 'use client') or use React Query/SWR for client-side fetching with caching."
+    },
+    {
+      "file": "components/ui/carousel.tsx",
+      "line": 109,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Data fetching in client component with useEffect",
+      "description": "In Next.js App Router, data fetching in useEffect runs only on the client, missing SSR benefits, causing loading flashes, and duplicating requests.",
+      "suggested_fix": "Move data fetching to a Server Component (remove 'use client') or use React Query/SWR for client-side fetching with caching."
+    },
+    {
+      "file": "components/ui/toaster.tsx",
+      "line": 20,
+      "severity": "medium",
+      "category": "pattern",
+      "title": "Array index used as key prop",
+      "description": "Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.",
+      "suggested_fix": "Use a stable unique identifier: key={item.id} or key={item.slug}"
+    },
+    {
+      "file": "db/seed.ts",
+      "line": 15,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "db/seed.ts",
+      "line": 4,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "db/view-data.ts",
+      "line": 7,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "db/view-data.ts",
+      "line": 11,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "db/view-data.ts",
+      "line": 14,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "db/view-data.ts",
+      "line": 15,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "db/view-data.ts",
+      "line": 16,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "db/view-data.ts",
+      "line": 17,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "db/view-data.ts",
+      "line": 18,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "db/view-data.ts",
+      "line": 19,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "db/view-data.ts",
+      "line": 22,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "db/view-data.ts",
+      "line": 23,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "db/view-data.ts",
+      "line": 24,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "db/view-data.ts",
+      "line": 27,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "db/view-data.ts",
+      "line": 29,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "email/purchase-receipt.tsx",
+      "line": 108,
+      "severity": "medium",
+      "category": "pattern",
+      "title": "Array index used as key prop",
+      "description": "Using array index as key causes incorrect component reuse when items are added, removed, or reordered. This causes UI bugs and lost state.",
+      "suggested_fix": "Use a stable unique identifier: key={item.id} or key={item.slug}"
+    },
+    {
+      "file": "hooks/use-toast.ts",
+      "line": 171,
+      "severity": "high",
+      "category": "hooks",
+      "title": "useEffect missing dependency array",
+      "description": "useEffect without a dependency array runs after every render. This causes infinite loops if the effect updates state.",
+      "suggested_fix": "Add a dependency array: useEffect(() => { ... }, [dep1, dep2]). Use [] for mount-only effects."
+    },
+    {
+      "file": "lib/actions/cart.actions.ts",
+      "line": 125,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/cart.actions.ts",
+      "line": 154,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 272,
+      "severity": "low",
+      "category": "typescript",
+      "title": "console.log/warn/error left in code",
+      "description": "Console statements left in production code leak implementation details and clutter browser devtools.",
+      "suggested_fix": "Remove debug logs. Use a proper logging library or environment-gated logging."
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 345,
+      "severity": "medium",
+      "category": "typescript",
+      "title": "Unsafe type assertion (as)",
+      "description": "Direct type assertion bypasses TypeScript's type checker. If the actual runtime type doesn't match, you get silent corruption.",
+      "suggested_fix": "Use a type guard function or parse with zod/valibot for runtime validation before asserting the type."
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 310,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 349,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 18,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 67,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 70,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 107,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 122,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 122,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 133,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 136,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 162,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 210,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 210,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 235,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 242,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 277,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 310,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/order.actions.ts",
+      "line": 349,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/product.actions.ts",
+      "line": 11,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/actions/product.actions.ts",
+      "line": 21,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/actions/product.actions.ts",
+      "line": 28,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/actions/product.actions.ts",
+      "line": 37,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/actions/product.actions.ts",
+      "line": 193,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/actions/product.actions.ts",
+      "line": 11,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/product.actions.ts",
+      "line": 21,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/product.actions.ts",
+      "line": 28,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/product.actions.ts",
+      "line": 37,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/product.actions.ts",
+      "line": 183,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/product.actions.ts",
+      "line": 193,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/review.actions.ts",
+      "line": 109,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/actions/review.actions.ts",
+      "line": 11,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/review.actions.ts",
+      "line": 42,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/review.actions.ts",
+      "line": 52,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/review.actions.ts",
+      "line": 88,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/review.actions.ts",
+      "line": 109,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/user.actions.ts",
+      "line": 106,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/user.actions.ts",
+      "line": 118,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/user.actions.ts",
+      "line": 132,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/user.actions.ts",
+      "line": 146,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/user.actions.ts",
+      "line": 161,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/actions/user.actions.ts",
+      "line": 161,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/user.actions.ts",
+      "line": 173,
+      "severity": "medium",
+      "category": "nextjs",
+      "title": "Server Action without cache revalidation",
+      "description": "Mutating data without revalidating the cache means the UI shows stale data after the action completes.",
+      "suggested_fix": "Call revalidatePath('/path') or revalidateTag('tag') after mutations to refresh the cache."
+    },
+    {
+      "file": "lib/actions/user.actions.ts",
+      "line": 192,
+      "severity": "high",
+      "category": "nextjs",
+      "title": "Server Action without input validation",
+      "description": "Server Actions receive data directly from the client. Without validation, malicious users can send unexpected data.",
+      "suggested_fix": "Validate input with Zod before processing: const data = schema.parse(formData)"
+    },
+    {
+      "file": "lib/auth-guard.ts",
+      "line": 4,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/paypal.ts",
+      "line": 5,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/paypal.ts",
+      "line": 9,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/paypal.ts",
+      "line": 30,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/paypal.ts",
+      "line": 34,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/paypal.ts",
+      "line": 46,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/paypal.ts",
+      "line": 52,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/paypal.ts",
+      "line": 65,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    },
+    {
+      "file": "lib/utils.ts",
+      "line": 22,
+      "severity": "high",
+      "category": "typescript",
+      "title": "Explicit 'any' type usage",
+      "description": "Using 'any' defeats TypeScript's type safety. It spreads unsafety to all callers and disables autocomplete.",
+      "suggested_fix": "Use 'unknown' for truly unknown types (requires type narrowing), or define a specific interface/type."
+    },
+    {
+      "file": "middleware.ts",
+      "line": 4,
+      "severity": "high",
+      "category": "pattern",
+      "title": "Async operation without error handling",
+      "description": "Async operations without try/catch or .catch() will throw unhandled promise rejections that crash the component.",
+      "suggested_fix": "Wrap in try/catch or use React Query/SWR which handles errors automatically. Add an error boundary for component-level errors."
+    }
+  ]
+}

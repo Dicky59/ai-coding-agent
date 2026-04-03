@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getAllReports, getReport } from "@/lib/reports";
 
+// This route only runs in local dev (reads from filesystem)
+// On Vercel, the client fetches from /reports/*.json directly
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
