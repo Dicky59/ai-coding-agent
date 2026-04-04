@@ -7,16 +7,41 @@ import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis,
   Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
-import type { Report, Finding } from "@/lib/types";
-import { getLanguageInfo, formatDate } from "@/lib/reports";
+import { supabase } from "@/lib/supabase";
+import { getLanguageInfo, formatDate } from "@/lib/utils";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface Finding {
+  id: string;
+  file: string;
+  line: number;
+  severity: "critical" | "high" | "medium" | "low";
+  category: string;
+  title: string;
+  description: string;
+  suggested_fix: string;
+}
+
+interface Report {
+  id: string;
+  repo_name: string;
+  repo_path: string;
+  language: string;
+  scanned_at: string;
+  total_findings: number;
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+  ai_summary: string;
+  findings: Finding[];
+}
+
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const SEV_COLORS: Record<string, string> = {
-  critical: "#ef4444",
-  high: "#f97316",
-  medium: "#eab308",
-  low: "#22c55e",
+  critical: "#ef4444", high: "#f97316", medium: "#eab308", low: "#22c55e",
 };
 
 const SEV_BG: Record<string, string> = {
@@ -53,10 +78,9 @@ function SeverityPie({ report }: { report: Report }) {
         <PieChart>
           <Pie data={data} cx="50%" cy="50%" innerRadius={50} outerRadius={75}
             dataKey="value" paddingAngle={2}>
-            {data.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+            {data.map((e, i) => <Cell key={i} fill={e.color} />)}
           </Pie>
-          <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8 }}
-            labelStyle={{ color: "#e2e8f0" }} />
+          <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8 }} />
           <Legend formatter={(v) => <span className="text-slate-300 text-xs">{v}</span>} />
         </PieChart>
       </ResponsiveContainer>
@@ -81,8 +105,7 @@ function CategoryBar({ findings }: { findings: Finding[] }) {
         <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
           <XAxis type="number" tick={{ fill: "#64748b", fontSize: 11 }} />
           <YAxis type="category" dataKey="name" tick={{ fill: "#94a3b8", fontSize: 11 }} width={110} />
-          <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8 }}
-            labelStyle={{ color: "#e2e8f0" }} />
+          <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8 }} />
           <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} />
         </BarChart>
       </ResponsiveContainer>
@@ -104,17 +127,11 @@ function FindingRow({ finding }: { finding: Finding }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-slate-200 text-sm font-medium">{finding.title}</span>
-            <span className="text-xs text-slate-500">
-              {CAT_ICONS[finding.category] || "📌"} {finding.category}
-            </span>
+            <span className="text-xs text-slate-500">{CAT_ICONS[finding.category] || "📌"} {finding.category}</span>
           </div>
-          <div className="text-xs text-indigo-400 mt-0.5 font-mono">
-            {fileName}:{finding.line}
-          </div>
+          <div className="text-xs text-indigo-400 mt-0.5 font-mono">{fileName}:{finding.line}</div>
         </div>
-        <span className="text-slate-500 text-xs shrink-0 mt-1">
-          {expanded ? "▲ hide" : "▼ details"}
-        </span>
+        <span className="text-slate-500 text-xs shrink-0 mt-1">{expanded ? "▲ hide" : "▼ details"}</span>
       </button>
       {expanded && (
         <div className="px-4 pb-4 ml-[88px]">
@@ -149,25 +166,37 @@ export default function ReportPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    // Try API route first (local dev), then fall back to public folder (Vercel)
-    const tryFetch = async () => {
-      try {
-        let res = await fetch(`/api/reports?id=${encodeURIComponent(id)}`);
-        if (!res.ok) {
-          // Fallback: fetch from public/reports/ (Vercel)
-          res = await fetch(`/reports/${encodeURIComponent(id)}.json`);
-        }
-        if (!res.ok) throw new Error("Not found");
-        const data = await res.json();
-        if (data.error) setError(data.error);
-        else setReport({ ...data, id });
-      } catch {
+    async function fetchReport() {
+      // Fetch report metadata
+      const { data: reportData, error: reportError } = await supabase
+        .from("reports")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (reportError || !reportData) {
         setError("Report not found");
-      } finally {
         setLoading(false);
+        return;
       }
-    };
-    tryFetch();
+
+      // Fetch findings for this report
+      const { data: findingsData, error: findingsError } = await supabase
+        .from("findings")
+        .select("*")
+        .eq("report_id", id)
+        .order("severity", { ascending: true });
+
+      if (findingsError) {
+        setError("Failed to load findings");
+        setLoading(false);
+        return;
+      }
+
+      setReport({ ...reportData, findings: findingsData || [] });
+      setLoading(false);
+    }
+    fetchReport();
   }, [id]);
 
   const categories = useMemo(() => {
@@ -182,11 +211,9 @@ export default function ReportPage() {
       if (categoryFilter !== "all" && f.category !== categoryFilter) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        return (
-          f.title.toLowerCase().includes(q) ||
+        return f.title.toLowerCase().includes(q) ||
           f.file.toLowerCase().includes(q) ||
-          f.description.toLowerCase().includes(q)
-        );
+          f.description.toLowerCase().includes(q);
       }
       return true;
     });
@@ -218,6 +245,7 @@ export default function ReportPage() {
 
   return (
     <div>
+      {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
         <Link href="/" className="hover:text-slate-300 transition-colors">Dashboard</Link>
         <span>→</span>
@@ -235,7 +263,9 @@ export default function ReportPage() {
               </span>
             </div>
             <p className="text-slate-400 text-sm">{formatDate(report.scanned_at)}</p>
-            <p className="text-slate-500 text-xs mt-1 font-mono">{report.repo_path}</p>
+            {report.repo_path && (
+              <p className="text-slate-500 text-xs mt-1 font-mono">{report.repo_path}</p>
+            )}
           </div>
           <div className="flex gap-4">
             {(["critical", "high", "medium", "low"] as const).map((sev) => (
@@ -248,12 +278,13 @@ export default function ReportPage() {
             ))}
           </div>
         </div>
+
         {report.ai_summary && (
           <div className="mt-4 pt-4 border-t border-slate-700">
             <h3 className="text-sm font-medium text-indigo-300 mb-2">🧠 AI Analysis</h3>
             <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-line">
-              {report.ai_summary.substring(0, 500)}
-              {report.ai_summary.length > 500 ? "..." : ""}
+              {report.ai_summary.substring(0, 600)}
+              {report.ai_summary.length > 600 ? "..." : ""}
             </p>
           </div>
         )}
@@ -267,7 +298,7 @@ export default function ReportPage() {
         </div>
       )}
 
-      {/* Findings */}
+      {/* Findings table */}
       <div className="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-700 flex flex-wrap items-center gap-3">
           <h2 className="text-slate-200 font-semibold">
@@ -295,12 +326,13 @@ export default function ReportPage() {
             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
             className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500 ml-auto w-48" />
         </div>
+
         {filteredFindings.length === 0 ? (
           <div className="text-center py-12 text-slate-500">
             {report.total_findings === 0 ? "✅ No issues found — clean scan!" : "No findings match your filters"}
           </div>
         ) : (
-          <div>{filteredFindings.map((f, i) => <FindingRow key={i} finding={f} />)}</div>
+          <div>{filteredFindings.map((f) => <FindingRow key={f.id} finding={f} />)}</div>
         )}
       </div>
 
