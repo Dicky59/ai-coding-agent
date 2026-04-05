@@ -448,6 +448,7 @@ async def _analyze_python_quality(file_path: str, repo_path: str) -> list[TextCo
     current_func_name = ""
     current_func_indent = 0
     brace_depth = 0
+    reported_nesting_funcs: set[str] = set()  # track which funcs already reported
 
     for i, line in enumerate(lines):
         stripped = line.strip()
@@ -542,21 +543,14 @@ async def _analyze_python_quality(file_path: str, repo_path: str) -> list[TextCo
                 "low", "quality",
             ))
 
-        # Deep nesting (more than 4 levels)
-        # Report once per nested block, not once per line
+        # Deep nesting — report once per function, not once per line
         if indent >= 16 and stripped:  # 4 spaces * 4 levels
-            # Only report if this is the START of a new nested block
-            # (previous line was at a lower indent level)
-            prev_indent = 0
-            if i > 0:
-                prev_line = lines[i - 1]
-                if prev_line.strip():
-                    prev_indent = len(prev_line) - len(prev_line.lstrip())
-            if indent > prev_indent:
+            if current_func_name and current_func_name not in reported_nesting_funcs:
+                reported_nesting_funcs.add(current_func_name)
                 findings.append(make_finding(
                     i + 1, stripped,
-                    "Deeply nested code",
-                    f"Code nested {indent // 4} levels deep is hard to read and test. "
+                    f"Function '{current_func_name}' has deeply nested code",
+                    f"Code nested {indent // 4}+ levels deep is hard to read and test. "
                     "Deep nesting often indicates too much complexity in one function.",
                     "Extract nested logic into helper functions. "
                     "Use early returns to reduce nesting.",

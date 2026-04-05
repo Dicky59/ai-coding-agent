@@ -219,10 +219,10 @@ def get_first_changed_position(patch: str) -> int | None:
 
 # ─── AI summary ───────────────────────────────────────────────────────────────
 
-def generate_ai_summary(findings: list[dict], repo: str) -> str:
+async def generate_ai_summary(findings: list[dict], repo: str) -> str:
     if not findings:
         return ""
-    time.sleep(2)
+    await asyncio.sleep(2)
     try:
         by_sev = {"critical": [], "high": [], "medium": [], "low": []}
         for f in findings:
@@ -406,7 +406,7 @@ async def run_pr_review() -> None:
 
     # Generate AI summary
     print("  🤖 Generating AI summary...")
-    ai_summary = generate_ai_summary(all_findings, REPO_NAME)
+    ai_summary = await generate_ai_summary(all_findings, REPO_NAME)
 
     # Build inline comments — one per file
     inline_comments = []

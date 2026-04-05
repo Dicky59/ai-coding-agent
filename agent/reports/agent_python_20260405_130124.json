@@ -1,0 +1,1787 @@
+{
+  "repo_path": "C:/Users/dicky/projects/coding-agent/agent",
+  "repo_name": "agent",
+  "language": "python",
+  "scanned_at": "2026-04-05T13:01:24.088955",
+  "total_findings": 197,
+  "critical": 0,
+  "high": 1,
+  "medium": 181,
+  "low": 15,
+  "ai_summary": "## Executive Summary\n\n**Critical Issue:** High-priority async violation in `github_action_runner.py:225` using `time.sleep()` in async function, which blocks the event loop and degrades performance. Replace with `asyncio.sleep()` immediately.\n\n**Major Concerns:**\n- **Code Quality Crisis:** 181 medium-severity findings indicate systemic issues with deeply nested code (primarily in `agent.py` and `bug_agent.py`), suggesting poor separation of concerns and maintainability problems\n- **Type Safety Gaps:** Missing return type hints across multiple modules compromise code reliability and IDE support\n- **Production Code Issues:** Print statements in `reporter.py` indicate debugging code left in production\n\n**Recommended Priorities:**\n1. **Fix async pattern** - Replace blocking sleep calls\n2. **Refactor nested code** - Extract methods, implement early returns, and reduce cyclomatic complexity\n3. **Add type hints** - Implement comprehensive typing for better code safety\n4. **Clean production code** - Replace print statements with proper logging\n\n**Impact:** These issues collectively undermine code maintainability, performance, and reliability. The async violation alone can cause significant performance degradation in concurrent scenarios typical of AI agent workloads.",
+  "findings": [
+    {
+      "file": "github_action_runner.py",
+      "line": 225,
+      "severity": "high",
+      "category": "async",
+      "title": "time.sleep() in async function (blocks event loop)",
+      "description": "time.sleep() blocks the entire event loop, preventing other coroutines from running during the sleep.",
+      "suggested_fix": "Use await asyncio.sleep() instead."
+    },
+    {
+      "file": "agent.py",
+      "line": 63,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 50,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 68,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 70,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 115,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 120,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 122,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 123,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 154,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 156,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 163,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 135,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 219,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 220,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 222,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 318,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 455,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 461,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 463,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 471,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 506,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 521,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 544,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 368,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_fix_agent' is too long (197 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 120,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 123,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 130,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 137,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 138,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 144,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 146,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 147,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 148,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 6 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 150,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 7 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 153,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 6 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 158,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 268,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 270,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 272,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 365,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 373,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 374,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 376,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 628,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 691,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 739,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 741,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 743,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 745,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 121,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 126,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 6 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 188,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 234,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 236,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 242,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 336,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 339,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 340,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 343,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 397,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 401,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 404,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 445,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 488,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 513,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 516,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 465,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_full_scan' is too long (61 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 58,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 75,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 77,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 126,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 131,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 133,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 134,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 164,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 166,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 168,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 173,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 249,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 56,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 73,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 75,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 127,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 132,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 134,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 135,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 167,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 169,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 170,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 6 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 174,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 179,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 256,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 72,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 91,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 127,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 129,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 143,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 259,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 221,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_repo_analyzer' is too long (65 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 340,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 341,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 346,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 348,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 311,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_bug_detector' is too long (56 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 427,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 431,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 451,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 453,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 455,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 458,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 6 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 460,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 397,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_security_auditor' is too long (69 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 484,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 633,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 636,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 637,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 639,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 6 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 641,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 144,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 161,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 163,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 188,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 303,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 306,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 307,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 311,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 336,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 341,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 408,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 419,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 423,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 476,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 354,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'review_pr' is too long (156 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 56,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 73,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 75,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 124,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 129,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 131,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 132,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 162,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 164,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 165,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 6 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 169,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 174,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 249,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 265,
+      "severity": "medium",
+      "category": "bug",
+      "title": "Possible missing f-string prefix",
+      "description": "This string contains {variable} placeholders but doesn't have the f prefix. The variables will be printed literally.",
+      "suggested_fix": "Add f prefix: f'Hello {name}' instead of 'Hello {name}'"
+    },
+    {
+      "file": "reporter.py",
+      "line": 266,
+      "severity": "medium",
+      "category": "bug",
+      "title": "Possible missing f-string prefix",
+      "description": "This string contains {variable} placeholders but doesn't have the f prefix. The variables will be printed literally.",
+      "suggested_fix": "Add f prefix: f'Hello {name}' instead of 'Hello {name}'"
+    },
+    {
+      "file": "reporter.py",
+      "line": 267,
+      "severity": "medium",
+      "category": "bug",
+      "title": "Possible missing f-string prefix",
+      "description": "This string contains {variable} placeholders but doesn't have the f prefix. The variables will be printed literally.",
+      "suggested_fix": "Add f prefix: f'Hello {name}' instead of 'Hello {name}'"
+    },
+    {
+      "file": "reporter.py",
+      "line": 268,
+      "severity": "medium",
+      "category": "bug",
+      "title": "Possible missing f-string prefix",
+      "description": "This string contains {variable} placeholders but doesn't have the f prefix. The variables will be printed literally.",
+      "suggested_fix": "Add f prefix: f'Hello {name}' instead of 'Hello {name}'"
+    },
+    {
+      "file": "reporter.py",
+      "line": 89,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 102,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 108,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 116,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 119,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 120,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 122,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 6 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 123,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 7 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 136,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 137,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 6 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 142,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 143,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 6 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 145,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 6 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 147,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 178,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 180,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "scheduled_scanner.py",
+      "line": 74,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "scheduled_scanner.py",
+      "line": 193,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'main' is too long (96 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 56,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 73,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 75,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 130,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 135,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 137,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 138,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 170,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 172,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 173,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 6 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 177,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 5 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 182,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 262,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Deeply nested code",
+      "description": "Code nested 4 levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "agent.py",
+      "line": 83,
+      "severity": "low",
+      "category": "quality",
+      "title": "Function 'make_agent_node' missing return type hint",
+      "description": "Type hints make code easier to understand and enable static analysis tools to catch type errors.",
+      "suggested_fix": "Add return type: def foo(x: int) -> str: or -> None for functions that don't return a value."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 544,
+      "severity": "low",
+      "category": "quality",
+      "title": "Function 'count_sev' missing return type hint",
+      "description": "Type hints make code easier to understand and enable static analysis tools to catch type errors.",
+      "suggested_fix": "Add return type: def foo(x: int) -> str: or -> None for functions that don't return a value."
+    },
+    {
+      "file": "reporter.py",
+      "line": 82,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 108,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 112,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 145,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 147,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 152,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 343,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 371,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 376,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 395,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 415,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 417,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "sync_reports.py",
+      "line": 15,
+      "severity": "low",
+      "category": "quality",
+      "title": "Function 'sync_reports' missing return type hint",
+      "description": "Type hints make code easier to understand and enable static analysis tools to catch type errors.",
+      "suggested_fix": "Add return type: def foo(x: int) -> str: or -> None for functions that don't return a value."
+    }
+  ]
+}

@@ -1,0 +1,752 @@
+{
+  "repo_path": "C:/Users/dicky/projects/coding-agent/agent",
+  "repo_name": "agent",
+  "language": "python",
+  "scanned_at": "2026-04-05T13:07:07.257037",
+  "total_findings": 82,
+  "critical": 0,
+  "high": 1,
+  "medium": 66,
+  "low": 15,
+  "ai_summary": "## Executive Summary\n\n**Critical Issue**: The HIGH severity finding reveals `time.sleep()` blocking the async event loop in `github_action_runner.py`. This will cause significant performance degradation and potential deadlocks. **Priority 1**: Replace with `await asyncio.sleep()` immediately.\n\n**Code Quality Concerns**: 66 MEDIUM findings indicate widespread **deep nesting issues** across core modules (`agent.py`, `bug_agent.py`). This suggests:\n- Complex control flow that's hard to maintain\n- Potential violation of single responsibility principle\n- Testing difficulties\n\n**Python Best Practices**: Missing type hints on return values reduces code clarity and IDE support. The presence of `print()` statements in production code (`reporter.py`) indicates inadequate logging infrastructure.\n\n**Recommended Priorities**:\n1. **Fix async blocking** - Replace `time.sleep()` with `await asyncio.sleep()`\n2. **Refactor nested functions** - Extract helper functions, use early returns, implement guard clauses\n3. **Add complete type hints** - Especially for return types in `agent.py` and `multi_agent.py`\n4. **Implement proper logging** - Replace print statements with structured logging\n\nThe codebase shows signs of rapid development without sufficient attention to async patterns and maintainability. Focus on the async fix first, then systematic refactoring of the most complex functions.",
+  "findings": [
+    {
+      "file": "github_action_runner.py",
+      "line": 225,
+      "severity": "high",
+      "category": "async",
+      "title": "time.sleep() in async function (blocks event loop)",
+      "description": "time.sleep() blocks the entire event loop, preventing other coroutines from running during the sleep.",
+      "suggested_fix": "Use await asyncio.sleep() instead."
+    },
+    {
+      "file": "agent.py",
+      "line": 63,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'create_mcp_client' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 50,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'create_mcp_client' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 68,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'call_tool' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 115,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'scan_repository' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "bug_agent.py",
+      "line": 154,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'generate_ai_summary' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 135,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'generate_fix' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 219,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'apply_fix' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 318,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'get_default_branch' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 455,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_fix_agent' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent.py",
+      "line": 368,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_fix_agent' is too long (197 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 120,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'supabase_headers' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 268,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'generate_fix' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 365,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'ask_confirmation' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "fix_agent_ts.py",
+      "line": 628,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'format_pr_body' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 121,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'scan_kotlin_file' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 188,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'get_pr_info' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 234,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'generate_ai_summary' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 336,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'format_file_comment' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 397,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_pr_review' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 488,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_full_scan' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "github_action_runner.py",
+      "line": 465,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_full_scan' is too long (61 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 58,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'create_mcp_client' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 75,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'call_tool' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 126,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'scan_repository' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 164,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'generate_ai_summary' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "java_agent.py",
+      "line": 249,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'print_report' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 56,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'create_mcp_client' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 73,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'call_tool' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 127,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'scan_repository' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 167,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'generate_ai_summary' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "js_agent.py",
+      "line": 256,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'print_report' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 70,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'detect_languages' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 91,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'get_mcp_servers' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 127,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'call_tool' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 143,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'extract_text' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 259,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_repo_analyzer' has deeply nested code",
+      "description": "Code nested 5+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 221,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_repo_analyzer' is too long (65 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 340,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_bug_detector' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 311,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_bug_detector' is too long (56 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 427,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_security_auditor' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 397,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'run_security_auditor' is too long (69 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 633,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'count_sev' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 144,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'create_mcp_client' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 161,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'call_tool' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 188,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'scan_file' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 303,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'format_file_comment' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 336,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'generate_ai_summary' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 408,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'review_pr' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "pr_agent.py",
+      "line": 354,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'review_pr' is too long (156 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 56,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'create_mcp_client' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 73,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'call_tool' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 124,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'scan_repository' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 162,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'generate_ai_summary' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "py_agent.py",
+      "line": 249,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'print_report' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "reporter.py",
+      "line": 265,
+      "severity": "medium",
+      "category": "bug",
+      "title": "Possible missing f-string prefix",
+      "description": "This string contains {variable} placeholders but doesn't have the f prefix. The variables will be printed literally.",
+      "suggested_fix": "Add f prefix: f'Hello {name}' instead of 'Hello {name}'"
+    },
+    {
+      "file": "reporter.py",
+      "line": 266,
+      "severity": "medium",
+      "category": "bug",
+      "title": "Possible missing f-string prefix",
+      "description": "This string contains {variable} placeholders but doesn't have the f prefix. The variables will be printed literally.",
+      "suggested_fix": "Add f prefix: f'Hello {name}' instead of 'Hello {name}'"
+    },
+    {
+      "file": "reporter.py",
+      "line": 267,
+      "severity": "medium",
+      "category": "bug",
+      "title": "Possible missing f-string prefix",
+      "description": "This string contains {variable} placeholders but doesn't have the f prefix. The variables will be printed literally.",
+      "suggested_fix": "Add f prefix: f'Hello {name}' instead of 'Hello {name}'"
+    },
+    {
+      "file": "reporter.py",
+      "line": 268,
+      "severity": "medium",
+      "category": "bug",
+      "title": "Possible missing f-string prefix",
+      "description": "This string contains {variable} placeholders but doesn't have the f prefix. The variables will be printed literally.",
+      "suggested_fix": "Add f prefix: f'Hello {name}' instead of 'Hello {name}'"
+    },
+    {
+      "file": "reporter.py",
+      "line": 89,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'supabase_headers' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "scheduled_scanner.py",
+      "line": 74,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'update_scan_timestamps' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "scheduled_scanner.py",
+      "line": 193,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'main' is too long (96 lines)",
+      "description": "Long functions are hard to understand, test, and maintain. Each function should do one thing well.",
+      "suggested_fix": "Break into smaller functions. Aim for functions under 30 lines."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 56,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'create_mcp_client' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 73,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'call_tool' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 130,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'scan_repository' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 170,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'generate_ai_summary' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "ts_agent.py",
+      "line": 262,
+      "severity": "medium",
+      "category": "quality",
+      "title": "Function 'print_report' has deeply nested code",
+      "description": "Code nested 4+ levels deep is hard to read and test. Deep nesting often indicates too much complexity in one function.",
+      "suggested_fix": "Extract nested logic into helper functions. Use early returns to reduce nesting."
+    },
+    {
+      "file": "agent.py",
+      "line": 83,
+      "severity": "low",
+      "category": "quality",
+      "title": "Function 'make_agent_node' missing return type hint",
+      "description": "Type hints make code easier to understand and enable static analysis tools to catch type errors.",
+      "suggested_fix": "Add return type: def foo(x: int) -> str: or -> None for functions that don't return a value."
+    },
+    {
+      "file": "multi_agent.py",
+      "line": 544,
+      "severity": "low",
+      "category": "quality",
+      "title": "Function 'count_sev' missing return type hint",
+      "description": "Type hints make code easier to understand and enable static analysis tools to catch type errors.",
+      "suggested_fix": "Add return type: def foo(x: int) -> str: or -> None for functions that don't return a value."
+    },
+    {
+      "file": "reporter.py",
+      "line": 82,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 108,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 112,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 145,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 147,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 152,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 343,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 371,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 376,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 395,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 415,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "reporter.py",
+      "line": 417,
+      "severity": "low",
+      "category": "quality",
+      "title": "print() statement in production code",
+      "description": "print() statements left in production code clutter logs and may expose sensitive information.",
+      "suggested_fix": "Use Python's logging module instead: import logging; logger = logging.getLogger(__name__)"
+    },
+    {
+      "file": "sync_reports.py",
+      "line": 15,
+      "severity": "low",
+      "category": "quality",
+      "title": "Function 'sync_reports' missing return type hint",
+      "description": "Type hints make code easier to understand and enable static analysis tools to catch type errors.",
+      "suggested_fix": "Add return type: def foo(x: int) -> str: or -> None for functions that don't return a value."
+    }
+  ]
+}
