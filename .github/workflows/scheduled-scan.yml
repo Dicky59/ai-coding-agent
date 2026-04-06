@@ -16,6 +16,14 @@ on:
         description: 'Force scan even if weekly scan is disabled'
         required: false
         default: 'false'
+      repo_url:
+        description: 'Scan a custom repo URL (e.g. https://github.com/user/repo)'
+        required: false
+        default: ''
+      repo_language:
+        description: 'Language override (kotlin/java/typescript/javascript/python/auto)'
+        required: false
+        default: 'auto'
 
 jobs:
   scheduled-scan:
@@ -29,7 +37,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
 
       - name: Cache pip
         uses: actions/cache@v4
@@ -57,6 +65,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_SCAN: ${{ github.event.inputs.force || 'false' }}
           OVERRIDE_REPOS: ${{ github.event.inputs.repos || '' }}
+          REPO_URL: ${{ github.event.inputs.repo_url || '' }}
+          REPO_LANGUAGE: ${{ github.event.inputs.repo_language || 'auto' }}
           SCAN_MODE: scheduled
         run: |
           python agent/scheduled_scanner.py
