@@ -1,23 +1,13 @@
 "use client";
 
-import { supabase } from "@/lib/supabase";
-import { getLanguageInfo } from "@/lib/utils";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis, YAxis,
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  Legend, BarChart, Bar, PieChart, Pie, Cell, CartesianGrid,
 } from "recharts";
+import { supabase } from "@/lib/supabase";
+import { getLanguageInfo, formatDate } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -37,6 +27,7 @@ interface TopFinding {
   title: string;
   category: string;
   count: number;
+  fixed_count: number;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -56,7 +47,7 @@ const REPO_COLORS = [
 const CAT_ICONS: Record<string, string> = {
   security: "🔒", bug: "🐛", performance: "⚡",
   pattern: "🏗️", nextjs: "▲", hooks: "🪝",
-  typescript: "📘", jpa: "🗄️",
+  typescript: "📘", jpa: "🗄️", quality: "🏗️", async: "⚡",
 };
 
 // ─── Custom Tooltip ───────────────────────────────────────────────────────────
@@ -77,8 +68,6 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
-// ─── Section wrapper ──────────────────────────────────────────────────────────
-
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5 mb-6">
@@ -93,11 +82,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function TrendsPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [topFindings, setTopFindings] = useState<TopFinding[]>([]);
+  const [totalFixed, setTotalFixed] = useState(0);
+  const [totalOpen, setTotalOpen] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
-      // Fetch all reports ordered by date
+      // Reports
       const { data: reportsData } = await supabase
         .from("reports")
         .select("*")
@@ -105,21 +96,30 @@ export default function TrendsPage() {
 
       if (reportsData) setReports(reportsData);
 
-      // Fetch top finding titles
+      // Findings with fixed status
       const { data: findingsData } = await supabase
         .from("findings")
-        .select("title, category");
+        .select("title, category, fixed");
 
       if (findingsData) {
-        const counts: Record<string, { count: number; category: string }> = {};
+        const fixed = findingsData.filter((f) => f.fixed).length;
+        const open = findingsData.filter((f) => !f.fixed).length;
+        setTotalFixed(fixed);
+        setTotalOpen(open);
+
+        // Top findings
+        const counts: Record<string, { count: number; category: string; fixed_count: number }> = {};
         for (const f of findingsData) {
-          if (!counts[f.title]) counts[f.title] = { count: 0, category: f.category };
+          if (!counts[f.title]) counts[f.title] = { count: 0, category: f.category, fixed_count: 0 };
           counts[f.title].count++;
+          if (f.fixed) counts[f.title].fixed_count++;
         }
         const sorted = Object.entries(counts)
           .sort((a, b) => b[1].count - a[1].count)
           .slice(0, 10)
-          .map(([title, { count, category }]) => ({ title, category, count }));
+          .map(([title, { count, category, fixed_count }]) => ({
+            title, category, count, fixed_count,
+          }));
         setTopFindings(sorted);
       }
 
@@ -128,21 +128,16 @@ export default function TrendsPage() {
     fetchData();
   }, []);
 
-  // ── Findings over time (one line per repo) ──
+  // ── Findings over time ──
   const timelineData = useMemo(() => {
     if (!reports.length) return [];
-
-    // Get unique repos
     const repos = Array.from(new Set(reports.map((r) => r.repo_name)));
-
-    // Group by date (day)
     const byDate = new Map<string, Record<string, number>>();
     for (const r of reports) {
       const day = r.scanned_at.substring(0, 10);
       if (!byDate.has(day)) byDate.set(day, {});
       byDate.get(day)![r.repo_name] = r.total_findings;
     }
-
     return Array.from(byDate.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, repoData]) => ({
@@ -156,7 +151,7 @@ export default function TrendsPage() {
     [reports]
   );
 
-  // ── Severity breakdown over time ──
+  // ── Severity breakdown ──
   const severityData = useMemo(() => {
     if (!reports.length) return [];
     const byDate = new Map<string, { critical: number; high: number; medium: number; low: number }>();
@@ -186,13 +181,18 @@ export default function TrendsPage() {
     return Object.entries(counts).map(([lang, count]) => ({
       name: getLanguageInfo(lang).label,
       value: count,
-      icon: getLanguageInfo(lang).icon,
     }));
   }, [reports]);
 
   const langColors = ["#6366f1", "#f97316", "#06b6d4", "#22c55e", "#f59e0b"];
 
-  // ── Best/worst repos ──
+  // ── Fixed vs Open pie ──
+  const fixedVsOpenData = [
+    { name: "Open", value: totalOpen, color: "#f97316" },
+    { name: "Fixed", value: totalFixed, color: "#22c55e" },
+  ].filter((d) => d.value > 0);
+
+  // ── Repo stats ──
   const repoStats = useMemo(() => {
     const byRepo = new Map<string, Report[]>();
     for (const r of reports) {
@@ -202,9 +202,7 @@ export default function TrendsPage() {
     return Array.from(byRepo.entries()).map(([repo, scans]) => {
       const latest = scans[scans.length - 1];
       const first = scans[0];
-      const trend = scans.length > 1
-        ? latest.total_findings - first.total_findings
-        : 0;
+      const trend = scans.length > 1 ? latest.total_findings - first.total_findings : 0;
       return {
         repo,
         latest: latest.total_findings,
@@ -217,14 +215,13 @@ export default function TrendsPage() {
     }).sort((a, b) => b.latest - a.latest);
   }, [reports]);
 
-  // ── Overall stats ──
+  // ── Stats ──
   const totalScans = reports.length;
   const totalFindings = reports.reduce((s, r) => s + r.total_findings, 0);
   const avgFindings = totalScans ? Math.round(totalFindings / totalScans) : 0;
-  const latestReports = [...reports].sort(
-    (a, b) => new Date(b.scanned_at).getTime() - new Date(a.scanned_at).getTime()
-  );
-  const mostRecentTotal = latestReports[0]?.total_findings ?? 0;
+  const fixPct = (totalFixed + totalOpen) > 0
+    ? Math.round((totalFixed / (totalFixed + totalOpen)) * 100)
+    : 0;
 
   if (loading) {
     return (
@@ -264,10 +261,10 @@ export default function TrendsPage() {
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
-          { label: "Total Scans", value: totalScans, icon: "📊", color: "text-indigo-400" },
-          { label: "Total Findings", value: totalFindings, icon: "🔍", color: "text-slate-200" },
-          { label: "Avg per Scan", value: avgFindings, icon: "📐", color: "text-blue-400" },
-          { label: "Latest Scan", value: mostRecentTotal, icon: "🕐", color: "text-purple-400" },
+          { label: "Total Scans",    value: totalScans,    icon: "📊", color: "text-indigo-400" },
+          { label: "Total Findings", value: totalFindings, icon: "🔍", color: "text-slate-200"  },
+          { label: "Fixed",          value: totalFixed,    icon: "✅", color: "text-green-400"  },
+          { label: "Fix Rate",       value: `${fixPct}%`,  icon: "📈", color: "text-blue-400"   },
         ].map((s) => (
           <div key={s.label} className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
             <div className="flex items-center justify-between">
@@ -307,24 +304,81 @@ export default function TrendsPage() {
         </Section>
       )}
 
-      {/* Severity breakdown */}
-      {severityData.length > 0 && (
-        <Section title="🎯 Severity Breakdown Over Time">
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={severityData} margin={{ left: 0, right: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="date" tick={{ fill: "#64748b", fontSize: 11 }} />
-              <YAxis tick={{ fill: "#64748b", fontSize: 11 }} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend formatter={(v) => <span className="text-slate-300 text-xs capitalize">{v}</span>} />
-              <Bar dataKey="critical" stackId="a" fill={SEV_COLORS.critical} radius={[0, 0, 0, 0]} />
-              <Bar dataKey="high" stackId="a" fill={SEV_COLORS.high} />
-              <Bar dataKey="medium" stackId="a" fill={SEV_COLORS.medium} />
-              <Bar dataKey="low" stackId="a" fill={SEV_COLORS.low} radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Section>
-      )}
+      {/* Severity + Fixed vs Open */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+        {/* Severity breakdown */}
+        {severityData.length > 0 && (
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
+            <h2 className="text-slate-200 font-semibold mb-4">🎯 Severity Breakdown</h2>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={severityData} margin={{ left: 0, right: 10 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="date" tick={{ fill: "#64748b", fontSize: 10 }} />
+                <YAxis tick={{ fill: "#64748b", fontSize: 10 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="critical" stackId="a" fill={SEV_COLORS.critical} />
+                <Bar dataKey="high"     stackId="a" fill={SEV_COLORS.high}     />
+                <Bar dataKey="medium"   stackId="a" fill={SEV_COLORS.medium}   />
+                <Bar dataKey="low"      stackId="a" fill={SEV_COLORS.low} radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* Fixed vs Open */}
+        <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
+          <h2 className="text-slate-200 font-semibold mb-4">✅ Fixed vs Open</h2>
+          {fixedVsOpenData.length > 0 ? (
+            <>
+              <ResponsiveContainer width="100%" height={160}>
+                <PieChart>
+                  <Pie
+                    data={fixedVsOpenData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={45}
+                    outerRadius={70}
+                    dataKey="value"
+                    paddingAngle={3}
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
+                    labelLine={{ stroke: "#475569" }}
+                  >
+                    {fixedVsOpenData.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: "#1e293b", border: "1px solid #334155",
+                      borderRadius: 8, color: "#e2e8f0",
+                    }}
+                    itemStyle={{ color: "#e2e8f0" }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex justify-center gap-6 mt-2">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-orange-400">{totalOpen}</p>
+                  <p className="text-xs text-slate-500">Open</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-400">{totalFixed}</p>
+                  <p className="text-xs text-slate-500">Fixed</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-blue-400">{fixPct}%</p>
+                  <p className="text-xs text-slate-500">Fix rate</p>
+                </div>
+              </div>
+            </>
+          ) : (
+            <p className="text-slate-500 text-sm text-center py-8">No data</p>
+          )}
+        </div>
+      </div>
 
       {/* Repo stats + Language pie */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -377,9 +431,7 @@ export default function TrendsPage() {
                   outerRadius={85}
                   dataKey="value"
                   paddingAngle={2}
-                  label={({ name, percent }) =>
-                    `${name} ${(percent * 100).toFixed(0)}%`
-                  }
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   labelLine={{ stroke: "#475569" }}
                 >
                   {languageData.map((_, i) => (
@@ -388,12 +440,9 @@ export default function TrendsPage() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    background: "#1e293b",
-                    border: "1px solid #334155",
-                    borderRadius: 8,
-                    color: "#e2e8f0",
+                    background: "#1e293b", border: "1px solid #334155",
+                    borderRadius: 8, color: "#e2e8f0",
                   }}
-                  labelStyle={{ color: "#e2e8f0" }}
                   itemStyle={{ color: "#e2e8f0" }}
                 />
               </PieChart>
@@ -404,34 +453,38 @@ export default function TrendsPage() {
         </div>
       </div>
 
-      {/* Top issues */}
+      {/* Top issues with fix progress */}
       {topFindings.length > 0 && (
         <Section title="🔝 Most Common Issues">
           <div className="space-y-2">
-            {topFindings.map((f, i) => (
-              <div key={i} className="flex items-center gap-3 py-2 border-b border-slate-700/50 last:border-0">
-                <span className="text-slate-500 text-xs w-5 text-right shrink-0">{i + 1}</span>
-                <span className="text-base shrink-0">{CAT_ICONS[f.category] || "📌"}</span>
-                <span className="text-slate-300 text-sm flex-1 min-w-0 truncate">{f.title}</span>
-                <div className="flex items-center gap-2 shrink-0">
-                  <div
-                    className="h-1.5 rounded-full bg-indigo-500"
-                    style={{
-                      width: `${Math.round((f.count / topFindings[0].count) * 80)}px`,
-                      minWidth: "8px",
-                    }}
-                  />
-                  <span className="text-slate-400 text-xs w-8 text-right">{f.count}×</span>
+            {topFindings.map((f, i) => {
+              const fixPctItem = f.count > 0 ? Math.round((f.fixed_count / f.count) * 100) : 0;
+              return (
+                <div key={i} className="flex items-center gap-3 py-2 border-b border-slate-700/50 last:border-0">
+                  <span className="text-slate-500 text-xs w-5 text-right shrink-0">{i + 1}</span>
+                  <span className="text-base shrink-0">{CAT_ICONS[f.category] || "📌"}</span>
+                  <span className="text-slate-300 text-sm flex-1 min-w-0 truncate">{f.title}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {/* Fix progress bar */}
+                    <div className="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-green-500 rounded-full transition-all"
+                        style={{ width: `${fixPctItem}%` }}
+                      />
+                    </div>
+                    <span className="text-slate-400 text-xs w-20 text-right">
+                      {f.fixed_count}/{f.count} fixed
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Section>
       )}
 
-      {/* Footer note */}
       <p className="text-center text-slate-600 text-xs mt-4">
-        Based on {totalScans} scan{totalScans !== 1 ? "s" : ""} across {uniqueRepos.length} project{uniqueRepos.length !== 1 ? "s" : ""}
+        {totalScans} scan{totalScans !== 1 ? "s" : ""} · {uniqueRepos.length} project{uniqueRepos.length !== 1 ? "s" : ""} · {fixPct}% fix rate
       </p>
     </div>
   );

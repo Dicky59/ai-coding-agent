@@ -1,14 +1,21 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis,
-  Tooltip, ResponsiveContainer, Legend,
-} from "recharts";
 import { supabase } from "@/lib/supabase";
-import { getLanguageInfo, formatDate } from "@/lib/utils";
+import { formatDate, getLanguageInfo } from "@/lib/utils";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis, YAxis,
+} from "recharts";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -21,6 +28,8 @@ interface Finding {
   title: string;
   description: string;
   suggested_fix: string;
+  fixed: boolean;
+  fixed_at: string | null;
 }
 
 interface Report {
@@ -58,38 +67,52 @@ const SEV_ICONS: Record<string, string> = {
 const CAT_ICONS: Record<string, string> = {
   security: "🔒", bug: "🐛", performance: "⚡",
   pattern: "🏗️", nextjs: "▲", hooks: "🪝",
-  typescript: "📘", jpa: "🗄️",
+  typescript: "📘", jpa: "🗄️", quality: "🏗️", async: "⚡",
 };
 
 // ─── Components ───────────────────────────────────────────────────────────────
 
-function SeverityPie({ report }: { report: Report }) {
+function SeverityPie({ report, findings }: { report: Report; findings: Finding[] }) {
+  const open = findings.filter((f) => !f.fixed);
   const data = [
-    { name: "Critical", value: report.critical, color: SEV_COLORS.critical },
-    { name: "High",     value: report.high,     color: SEV_COLORS.high     },
-    { name: "Medium",   value: report.medium,   color: SEV_COLORS.medium   },
-    { name: "Low",      value: report.low,      color: SEV_COLORS.low      },
+    { name: "Critical", value: open.filter((f) => f.severity === "critical").length, color: SEV_COLORS.critical },
+    { name: "High",     value: open.filter((f) => f.severity === "high").length,     color: SEV_COLORS.high     },
+    { name: "Medium",   value: open.filter((f) => f.severity === "medium").length,   color: SEV_COLORS.medium   },
+    { name: "Low",      value: open.filter((f) => f.severity === "low").length,      color: SEV_COLORS.low      },
   ].filter((d) => d.value > 0);
 
   return (
     <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-      <h3 className="text-sm font-medium text-slate-300 mb-4">By Severity</h3>
-      <ResponsiveContainer width="100%" height={180}>
-        <PieChart>
-          <Pie data={data} cx="50%" cy="50%" innerRadius={50} outerRadius={75}
-            dataKey="value" paddingAngle={2}>
-            {data.map((e, i) => <Cell key={i} fill={e.color} />)}
-          </Pie>
-          <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8 }} />
-          <Legend formatter={(v) => <span className="text-slate-300 text-xs">{v}</span>} />
-        </PieChart>
-      </ResponsiveContainer>
+      <h3 className="text-sm font-medium text-slate-300 mb-4">By Severity (open)</h3>
+      {data.length === 0 ? (
+        <div className="flex items-center justify-center h-44 text-green-400 text-sm">
+          ✅ All findings fixed!
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={180}>
+          <PieChart>
+            <Pie data={data} cx="50%" cy="50%" innerRadius={50} outerRadius={75}
+              dataKey="value" paddingAngle={2}>
+              {data.map((e, i) => <Cell key={i} fill={e.color} />)}
+            </Pie>
+            <Tooltip contentStyle={{
+              background: "#1e293b", border: "1px solid #334155",
+              borderRadius: 8, color: "#e2e8f0",
+            }}
+              labelStyle={{ color: "#e2e8f0" }}
+              itemStyle={{ color: "#e2e8f0" }}
+            />
+            <Legend formatter={(v) => <span className="text-slate-300 text-xs">{v}</span>} />
+          </PieChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 }
 
 function CategoryBar({ findings }: { findings: Finding[] }) {
-  const byCategory = findings.reduce((acc, f) => {
+  const open = findings.filter((f) => !f.fixed);
+  const byCategory = open.reduce((acc, f) => {
     acc[f.category] = (acc[f.category] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -100,40 +123,103 @@ function CategoryBar({ findings }: { findings: Finding[] }) {
 
   return (
     <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-      <h3 className="text-sm font-medium text-slate-300 mb-4">By Category</h3>
-      <ResponsiveContainer width="100%" height={180}>
-        <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
-          <XAxis type="number" tick={{ fill: "#64748b", fontSize: 11 }} />
-          <YAxis type="category" dataKey="name" tick={{ fill: "#94a3b8", fontSize: 11 }} width={110} />
-          <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8 }} />
-          <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
+      <h3 className="text-sm font-medium text-slate-300 mb-4">By Category (open)</h3>
+      {data.length === 0 ? (
+        <div className="flex items-center justify-center h-44 text-green-400 text-sm">
+          ✅ All findings fixed!
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={180}>
+          <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
+            <XAxis type="number" tick={{ fill: "#64748b", fontSize: 11 }} />
+            <YAxis type="category" dataKey="name" tick={{ fill: "#94a3b8", fontSize: 11 }} width={110} />
+            <Tooltip contentStyle={{
+              background: "#1e293b", border: "1px solid #334155",
+              borderRadius: 8, color: "#e2e8f0",
+            }} />
+            <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 }
 
-function FindingRow({ finding }: { finding: Finding }) {
+function FindingRow({
+  finding,
+  onToggleFixed,
+}: {
+  finding: Finding;
+  onToggleFixed: (id: string, fixed: boolean) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
+  const [toggling, setToggling] = useState(false);
   const fileName = finding.file.split(/[\\/]/).pop() || finding.file;
 
+  async function handleToggleFixed(e: React.MouseEvent) {
+    e.stopPropagation();
+    setToggling(true);
+    await onToggleFixed(finding.id, !finding.fixed);
+    setToggling(false);
+  }
+
   return (
-    <div className="border-b border-slate-700/50 last:border-0">
-      <button onClick={() => setExpanded(!expanded)}
-        className="w-full text-left px-4 py-3 hover:bg-slate-700/30 transition-colors flex items-start gap-3">
-        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${SEV_BG[finding.severity]} shrink-0 mt-0.5`}>
-          {SEV_ICONS[finding.severity]} {finding.severity}
+    <div className={`border-b border-slate-700/50 last:border-0 transition-opacity ${
+      finding.fixed ? "opacity-50" : ""
+    }`}>
+      <div
+        onClick={() => setExpanded(!expanded)}
+        className="w-full text-left px-4 py-3 hover:bg-slate-700/30 transition-colors flex items-start gap-3 cursor-pointer"
+      >
+        {/* Severity badge */}
+        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
+          finding.fixed
+            ? "bg-slate-800 text-slate-500 border-slate-700 line-through"
+            : SEV_BG[finding.severity]
+        } shrink-0 mt-0.5`}>
+          {finding.fixed ? "✅" : SEV_ICONS[finding.severity]} {finding.severity}
         </span>
+
+        {/* Title + file */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-slate-200 text-sm font-medium">{finding.title}</span>
-            <span className="text-xs text-slate-500">{CAT_ICONS[finding.category] || "📌"} {finding.category}</span>
+            <span className={`text-sm font-medium ${finding.fixed ? "text-slate-500 line-through" : "text-slate-200"}`}>
+              {finding.title}
+            </span>
+            <span className="text-xs text-slate-500">
+              {CAT_ICONS[finding.category] || "📌"} {finding.category}
+            </span>
           </div>
-          <div className="text-xs text-indigo-400 mt-0.5 font-mono">{fileName}:{finding.line}</div>
+          <div className="text-xs text-indigo-400 mt-0.5 font-mono">
+            {fileName}:{finding.line}
+          </div>
+          {finding.fixed && finding.fixed_at && (
+            <div className="text-xs text-green-600 mt-0.5">
+              Fixed {formatDate(finding.fixed_at)}
+            </div>
+          )}
         </div>
-        <span className="text-slate-500 text-xs shrink-0 mt-1">{expanded ? "▲ hide" : "▼ details"}</span>
-      </button>
-      {expanded && (
+
+        {/* Actions */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={handleToggleFixed}
+            disabled={toggling}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
+              finding.fixed
+                ? "bg-slate-700 text-slate-400 border-slate-600 hover:bg-red-950 hover:text-red-300 hover:border-red-800"
+                : "bg-slate-700 text-slate-300 border-slate-600 hover:bg-green-950 hover:text-green-300 hover:border-green-800"
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            {toggling ? "..." : finding.fixed ? "↩ Reopen" : "Mark Fixed"}
+          </button>
+          <span className="text-slate-500 text-xs mt-1">
+            {expanded ? "▲" : "▼"}
+          </span>
+        </div>
+      </div>
+
+      {expanded && !finding.fixed && (
         <div className="px-4 pb-4 ml-[88px]">
           <div className="bg-slate-900/50 rounded-lg p-3 space-y-2">
             <p className="text-slate-300 text-sm">{finding.description}</p>
@@ -151,6 +237,34 @@ function FindingRow({ finding }: { finding: Finding }) {
   );
 }
 
+// ─── Progress bar ─────────────────────────────────────────────────────────────
+
+function FixProgress({ findings }: { findings: Finding[] }) {
+  const total = findings.length;
+  const fixed = findings.filter((f) => f.fixed).length;
+  const pct = total > 0 ? Math.round((fixed / total) * 100) : 0;
+
+  return (
+    <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 mb-6">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-slate-300 text-sm font-medium">Fix Progress</span>
+        <span className="text-slate-300 text-sm font-medium">{fixed} / {total} fixed ({pct}%)</span>
+      </div>
+      <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-green-500 rounded-full transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      {pct === 100 && (
+        <p className="text-green-400 text-xs mt-2 text-center">
+          🎉 All findings resolved!
+        </p>
+      )}
+    </div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function ReportPage() {
@@ -158,16 +272,17 @@ export default function ReportPage() {
   const id = params.id as string;
 
   const [report, setReport] = useState<Report | null>(null);
+  const [findings, setFindings] = useState<Finding[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const [severityFilter, setSeverityFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "open" | "fixed">("open");
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     async function fetchReport() {
-      // Fetch report metadata
       const { data: reportData, error: reportError } = await supabase
         .from("reports")
         .select("*")
@@ -180,7 +295,6 @@ export default function ReportPage() {
         return;
       }
 
-      // Fetch findings for this report
       const { data: findingsData, error: findingsError } = await supabase
         .from("findings")
         .select("*")
@@ -193,22 +307,42 @@ export default function ReportPage() {
         return;
       }
 
-      setReport({ ...reportData, findings: findingsData || [] });
+      setReport(reportData);
+      setFindings(findingsData || []);
       setLoading(false);
     }
     fetchReport();
   }, [id]);
 
+  async function handleToggleFixed(findingId: string, fixed: boolean) {
+    const now = new Date().toISOString();
+    const { error } = await supabase
+      .from("findings")
+      .update({
+        fixed,
+        fixed_at: fixed ? now : null,
+      })
+      .eq("id", findingId);
+
+    if (!error) {
+      setFindings((prev) =>
+        prev.map((f) =>
+          f.id === findingId ? { ...f, fixed, fixed_at: fixed ? now : null } : f
+        )
+      );
+    }
+  }
+
   const categories = useMemo(() => {
-    if (!report) return [];
-    return Array.from(new Set(report.findings.map((f) => f.category)));
-  }, [report]);
+    return Array.from(new Set(findings.map((f) => f.category)));
+  }, [findings]);
 
   const filteredFindings = useMemo(() => {
-    if (!report) return [];
-    return report.findings.filter((f) => {
+    return findings.filter((f) => {
       if (severityFilter !== "all" && f.severity !== severityFilter) return false;
       if (categoryFilter !== "all" && f.category !== categoryFilter) return false;
+      if (statusFilter === "open" && f.fixed) return false;
+      if (statusFilter === "fixed" && !f.fixed) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         return f.title.toLowerCase().includes(q) ||
@@ -217,7 +351,10 @@ export default function ReportPage() {
       }
       return true;
     });
-  }, [report, severityFilter, categoryFilter, searchQuery]);
+  }, [findings, severityFilter, categoryFilter, statusFilter, searchQuery]);
+
+  const openCount = findings.filter((f) => !f.fixed).length;
+  const fixedCount = findings.filter((f) => f.fixed).length;
 
   if (loading) {
     return (
@@ -290,11 +427,14 @@ export default function ReportPage() {
         )}
       </div>
 
+      {/* Fix progress */}
+      {findings.length > 0 && <FixProgress findings={findings} />}
+
       {/* Charts */}
-      {report.total_findings > 0 && (
+      {findings.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <SeverityPie report={report} />
-          <CategoryBar findings={report.findings} />
+          <SeverityPie report={report} findings={findings} />
+          <CategoryBar findings={findings} />
         </div>
       )}
 
@@ -304,9 +444,29 @@ export default function ReportPage() {
           <h2 className="text-slate-200 font-semibold">
             Findings
             <span className="ml-2 text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">
-              {filteredFindings.length} / {report.total_findings}
+              {filteredFindings.length} shown
             </span>
           </h2>
+
+          {/* Status filter */}
+          <div className="flex rounded-lg overflow-hidden border border-slate-600">
+            {(["all", "open", "fixed"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  statusFilter === s
+                    ? "bg-indigo-600 text-white"
+                    : "bg-slate-700 text-slate-400 hover:bg-slate-600"
+                }`}
+              >
+                {s === "all" ? `All (${findings.length})`
+                  : s === "open" ? `Open (${openCount})`
+                  : `Fixed (${fixedCount})`}
+              </button>
+            ))}
+          </div>
+
           <select value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)}
             className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500">
             <option value="all">All severities</option>
@@ -315,6 +475,7 @@ export default function ReportPage() {
             <option value="medium">🟡 Medium</option>
             <option value="low">🟢 Low</option>
           </select>
+
           <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
             className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500">
             <option value="all">All categories</option>
@@ -322,17 +483,25 @@ export default function ReportPage() {
               <option key={cat} value={cat}>{CAT_ICONS[cat] || "📌"} {cat}</option>
             ))}
           </select>
-          <input type="text" placeholder="🔍 Search findings..."
+
+          <input type="text" placeholder="🔍 Search..."
             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500 ml-auto w-48" />
+            className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500 ml-auto w-40" />
         </div>
 
         {filteredFindings.length === 0 ? (
           <div className="text-center py-12 text-slate-500">
-            {report.total_findings === 0 ? "✅ No issues found — clean scan!" : "No findings match your filters"}
+            {findings.length === 0 ? "✅ No issues found — clean scan!"
+              : statusFilter === "fixed" ? "No fixed findings yet"
+              : statusFilter === "open" ? "🎉 All findings are fixed!"
+              : "No findings match your filters"}
           </div>
         ) : (
-          <div>{filteredFindings.map((f) => <FindingRow key={f.id} finding={f} />)}</div>
+          <div>
+            {filteredFindings.map((f) => (
+              <FindingRow key={f.id} finding={f} onToggleFixed={handleToggleFixed} />
+            ))}
+          </div>
         )}
       </div>
 
