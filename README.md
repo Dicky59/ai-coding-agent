@@ -68,7 +68,7 @@ Next.js dashboard deployed on Vercel reading from Supabase:
 
 - **Reports** — all scan results grouped by project
 - **Trends** — findings over time with charts
-- **Settings** — toggle weekly scans, pick scan day, trigger manual scans
+- **Settings** — Toggle weekly scans, pick scan day, scan any public GitHub repo by URL
 
 ### ⏰ Scheduled Weekly Scans
 
@@ -292,6 +292,18 @@ python py_agent.py C:/projects/my-python-project
 # Multi-language (auto-detects)
 python multi_agent.py C:/projects/my-fullstack-app
 ```
+
+### Scan from the Dashboard
+
+You can also trigger scans directly from the web dashboard without using the CLI:
+
+1. Go to the dashboard → **⚙️ Settings**
+2. Paste any public GitHub repository URL
+3. Select language (or leave as Auto-detect)
+4. Click **🔍 Scan Repository**
+5. Results appear on the dashboard in ~5-10 minutes
+
+This works for any public GitHub repository — not just pre-configured ones.
 
 ### Fix issues automatically
 
