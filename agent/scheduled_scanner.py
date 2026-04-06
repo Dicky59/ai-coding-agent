@@ -102,6 +102,11 @@ REPO_CONFIG = {
         "java",
         "https://github.com/spring-projects/spring-petclinic",
     ),
+    "coding-agent": (
+        "/tmp/repos/coding-agent",
+        "python",
+        "https://github.com/Dicky59/ai-coding-agent",
+    ),
 }
 
 
@@ -180,11 +185,25 @@ async def scan_java_repo(repo_path: str, repo_name: str) -> bool:
         return False
 
 
+async def scan_python_repo(repo_path: str, repo_name: str) -> bool:
+    print(f"\n  🐍 Scanning Python: {repo_name}")
+    try:
+        sys.path.insert(0, str(Path(__file__).parent))
+        from py_agent import scan_repo as py_scan
+        report = await py_scan(f"{repo_path}/agent")
+        print(f"  ✅ Python: {report.total_findings} findings")
+        return True
+    except Exception as e:
+        print(f"  ❌ Python failed: {e}")
+        return False
+
+
 SCAN_FUNCTIONS = {
     "kotlin":     scan_kotlin_repo,
     "typescript": scan_typescript_repo,
     "javascript": scan_javascript_repo,
     "java":       scan_java_repo,
+    "python":     scan_python_repo,
 }
 
 
