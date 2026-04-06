@@ -147,6 +147,7 @@ export default function SettingsPage() {
   }
 
   async function handleCustomScan() {
+
     if (!isValidGitHubUrl(repoUrl)) {
       setScanError("Please enter a valid GitHub URL (e.g. https://github.com/owner/repo)");
       return;
@@ -156,7 +157,7 @@ export default function SettingsPage() {
     setScanError("");
 
     const ok = await triggerWorkflow({
-      repo_url: repoUrl.trim(),
+      repo_url: repoUrl.trim().replace(/^_+|_+$/g, ""),
       repo_language: repoLanguage,
       force: "false",
     });
@@ -234,7 +235,7 @@ export default function SettingsPage() {
               type="url"
               value={repoUrl}
               onChange={(e) => {
-                setRepoUrl(e.target.value);
+                setRepoUrl(e.target.value.replace(/^_+|_+$/g, ""));
                 setScanStatus("idle");
                 setScanError("");
               }}

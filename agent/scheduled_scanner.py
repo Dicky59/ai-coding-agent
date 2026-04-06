@@ -39,7 +39,7 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 FORCE_SCAN = os.environ.get("FORCE_SCAN", "false").lower() == "true"
 OVERRIDE_REPOS = os.environ.get("OVERRIDE_REPOS", "").strip()
 SCAN_MODE = os.environ.get("SCAN_MODE", "scheduled")
-REPO_URL = os.environ.get("REPO_URL", "").strip()
+REPO_URL = os.environ.get("REPO_URL", "").strip().strip("_")
 REPO_LANGUAGE = os.environ.get("REPO_LANGUAGE", "auto").strip().lower()
 
 
