@@ -3,20 +3,25 @@ Scheduled Scanner — runs in GitHub Actions
 Checks Supabase settings before scanning.
 If weekly_scan_enabled=false, exits early (scan is "paused").
 
-The individual scan agents (ts_agent, js_agent, etc.) already save
-to Supabase via reporter.py — this script just orchestrates them.
+Supports:
+- Weekly scheduled scans of configured repos
+- Manual trigger of configured repos
+- Custom repo URL scan (REPO_URL env var)
 
 Environment variables needed:
   ANTHROPIC_API_KEY
   SUPABASE_URL
   SUPABASE_KEY
-  FORCE_SCAN=true/false   (override the enabled flag)
-  OVERRIDE_REPOS=repo1,repo2  (override configured repos)
+  FORCE_SCAN=true/false
+  OVERRIDE_REPOS=repo1,repo2
   SCAN_MODE=scheduled|manual
+  REPO_URL=https://github.com/user/repo   (custom repo scan)
+  REPO_LANGUAGE=auto|kotlin|java|typescript|javascript|python
 """
 
 import asyncio
 import os
+import re
 import subprocess
 import sys
 import time
@@ -34,6 +39,8 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 FORCE_SCAN = os.environ.get("FORCE_SCAN", "false").lower() == "true"
 OVERRIDE_REPOS = os.environ.get("OVERRIDE_REPOS", "").strip()
 SCAN_MODE = os.environ.get("SCAN_MODE", "scheduled")
+REPO_URL = os.environ.get("REPO_URL", "").strip()
+REPO_LANGUAGE = os.environ.get("REPO_LANGUAGE", "auto").strip().lower()
 
 
 # ─── Supabase helpers ─────────────────────────────────────────────────────────
@@ -79,6 +86,47 @@ async def update_scan_timestamps() -> None:
     print(f"  ✅ Next scan: {next_monday.strftime('%Y-%m-%d %H:%M UTC')}")
 
 
+# ─── Language detection ───────────────────────────────────────────────────────
+
+def detect_language(repo_path: str) -> str:
+    """Auto-detect the primary language of a repository."""
+    path = Path(repo_path)
+
+    # Priority rules — check for definitive files first
+    if (path / "AndroidManifest.xml").exists():
+        return "kotlin"
+    if list(path.rglob("*.kt")):
+        return "kotlin"
+    if (path / "pom.xml").exists():
+        return "java"
+    if (path / "tsconfig.json").exists():
+        return "typescript"
+
+    # Count files per language
+    py_files = [f for f in path.rglob("*.py")
+                if not any(p in str(f) for p in ["__pycache__", ".venv", "venv"])]
+    js_files = [f for f in path.rglob("*.js")
+                if "node_modules" not in str(f)]
+    java_files = list(path.rglob("*.java"))
+
+    if len(java_files) > 5:
+        return "java"
+    if len(py_files) > 5:
+        return "python"
+    if len(js_files) > 5:
+        return "javascript"
+
+    return "typescript"  # default for web projects
+
+
+def extract_repo_name_from_url(url: str) -> str:
+    """Extract repo name from GitHub URL."""
+    match = re.search(r'github\.com/[\w\-]+/([\w\-\.]+?)(?:\.git)?$', url.strip())
+    if match:
+        return match.group(1)
+    return url.rstrip("/").split("/")[-1].replace(".git", "")
+
+
 # ─── Repo config ──────────────────────────────────────────────────────────────
 
 REPO_CONFIG = {
@@ -105,7 +153,7 @@ REPO_CONFIG = {
     "coding-agent": (
         "/tmp/repos/coding-agent",
         "python",
-        "https://github.com/Dicky59/ai-coding-agent",
+        "https://github.com/Dicky59/coding-agent",
     ),
 }
 
@@ -130,8 +178,6 @@ async def clone_repo(name: str, url: str, path: str) -> bool:
 
 
 # ─── Scan functions ───────────────────────────────────────────────────────────
-# Each agent's scan_repo() already calls reporter.py which saves to Supabase.
-# We just call the agent — no duplicate saving needed here.
 
 async def scan_kotlin_repo(repo_path: str, repo_name: str) -> bool:
     print(f"\n  🤖 Scanning Kotlin: {repo_name}")
@@ -190,7 +236,8 @@ async def scan_python_repo(repo_path: str, repo_name: str) -> bool:
     try:
         sys.path.insert(0, str(Path(__file__).parent))
         from py_agent import scan_repo as py_scan
-        report = await py_scan(f"{repo_path}/agent")
+        scan_path = f"{repo_path}/agent" if repo_name == "coding-agent" else repo_path
+        report = await py_scan(scan_path)
         print(f"  ✅ Python: {report.total_findings} findings")
         return True
     except Exception as e:
@@ -207,13 +254,45 @@ SCAN_FUNCTIONS = {
 }
 
 
+# ─── Custom repo scan ─────────────────────────────────────────────────────────
+
+async def scan_custom_repo(repo_url: str, language: str) -> bool:
+    """Clone and scan a repo from a URL provided by the user."""
+    repo_name = extract_repo_name_from_url(repo_url)
+    repo_path = f"/tmp/repos/custom/{repo_name}"
+
+    print(f"\n  🔍 Custom scan: {repo_name}")
+    print(f"  📌 URL: {repo_url}")
+
+    cloned = await clone_repo(repo_name, repo_url, repo_path)
+    if not cloned:
+        return False
+
+    if language == "auto":
+        language = detect_language(repo_path)
+        print(f"  🔎 Auto-detected: {language}")
+
+    scan_fn = SCAN_FUNCTIONS.get(language)
+    if not scan_fn:
+        print(f"  ❌ No scanner for: {language}")
+        print(f"  Supported: {list(SCAN_FUNCTIONS.keys())}")
+        return False
+
+    return await scan_fn(repo_path, repo_name)
+
+
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
 async def main() -> None:
     print(f"\n{'═' * 60}")
-    print(f"  🤖 AI CODING AGENT — SCHEDULED SCAN")
+    print(f"  🤖 AI CODING AGENT — SCAN")
     print(f"  Mode: {SCAN_MODE}")
     print(f"  Time: {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}")
+    print(f"  REPO_URL env: '{REPO_URL}'")
+    print(f"  REPO_LANGUAGE env: '{REPO_LANGUAGE}'")
+    print(f"  FORCE_SCAN env: '{FORCE_SCAN}'")
+    if REPO_URL:
+        print(f"  Custom URL: {REPO_URL}")
     print(f"{'═' * 60}")
 
     if not SUPABASE_URL or not SUPABASE_KEY:
@@ -223,7 +302,18 @@ async def main() -> None:
         print("❌ ANTHROPIC_API_KEY required")
         sys.exit(1)
 
-    # Check settings
+    # ── Custom repo scan mode ──
+    if REPO_URL:
+        print(f"\n🔍 Custom repo scan")
+        success = await scan_custom_repo(REPO_URL, REPO_LANGUAGE)
+        if success:
+            print(f"\n✅ Scan complete — check dashboard for results!")
+        else:
+            print(f"\n❌ Scan failed")
+            sys.exit(1)
+        return
+
+    # ── Regular scheduled/manual scan ──
     print("\n📋 Checking Supabase settings...")
     settings = await get_settings()
     if not settings:
@@ -236,16 +326,14 @@ async def main() -> None:
     print(f"  Weekly scan enabled: {weekly_enabled}")
     print(f"  Configured repos:    {configured_repos}")
 
-    # Check if enabled
     if not weekly_enabled and not FORCE_SCAN:
-        print("\n⏸️  Weekly scan is DISABLED in dashboard settings.")
+        print("\n⏸️  Weekly scan is DISABLED.")
         print("   Toggle it on in ⚙️ Settings or use force=true.")
         sys.exit(0)
 
     if FORCE_SCAN:
-        print("  ⚡ Force scan — ignoring enabled flag")
+        print("  ⚡ Force scan")
 
-    # Which repos to scan
     if OVERRIDE_REPOS:
         repos_to_scan = [r.strip() for r in OVERRIDE_REPOS.split(",") if r.strip()]
         print(f"\n  Override repos: {repos_to_scan}")
@@ -257,7 +345,6 @@ async def main() -> None:
         print("⚠️  No repos to scan!")
         sys.exit(0)
 
-    # Clone and scan each repo
     results = []
     start_time = time.time()
 
@@ -275,7 +362,6 @@ async def main() -> None:
 
         scan_fn = SCAN_FUNCTIONS.get(language)
         if not scan_fn:
-            print(f"  ⚠️  No scanner for: {language}")
             continue
 
         success = await scan_fn(repo_path, repo_name)
@@ -285,13 +371,11 @@ async def main() -> None:
             "language": language,
         })
 
-        await asyncio.sleep(5)  # avoid rate limiting between scans
+        await asyncio.sleep(5)
 
-    # Update timestamps
     print(f"\n  📅 Updating timestamps...")
     await update_scan_timestamps()
 
-    # Summary
     elapsed = round(time.time() - start_time, 1)
     print(f"\n{'═' * 60}")
     print(f"  ✅ COMPLETE ({elapsed}s)")
