@@ -53,13 +53,13 @@ Reads findings from the database and generates targeted fixes:
 
 ```bash
 # Interactive mode — review each fix before applying
-python fix_agent_ts.py C:/projects/next-store
+python fix_agent_ts.py C:/projects/my-typescript-app
 
 # Automatic mode — apply all high-confidence fixes
-python fix_agent_ts.py C:/projects/next-store --auto
+python fix_agent_ts.py C:/projects/my-typescript-app --auto
 
 # Filter by severity or category
-python fix_agent_ts.py C:/projects/next-store --severity high --auto
+python fix_agent_ts.py C:/projects/my-typescript-app --severity high --auto
 ```
 
 ### 📊 Web Dashboard
@@ -315,7 +315,7 @@ python fix_agent_ts.py C:/projects/my-nextjs-app
 python fix_agent_ts.py C:/projects/my-nextjs-app --auto
 
 # Only high severity
-python fix_agent_ts.py C:/projects/my-nextjs-app --severity high --auto
+python fix_agent_ts.py C:/projects/my-typescript-app --severity high --auto
 
 # Kotlin — interactive
 python fix_agent.py C:/projects/my-android-app --findings bugs.json
