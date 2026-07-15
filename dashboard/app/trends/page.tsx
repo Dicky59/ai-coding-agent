@@ -36,7 +36,7 @@ const SEV_COLORS = {
   critical: "#ef4444",
   high: "#f97316",
   medium: "#eab308",
-  low: "#22c55e",
+  low: "#16a34a",
 };
 
 const REPO_COLORS = [
@@ -55,13 +55,13 @@ const CAT_ICONS: Record<string, string> = {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 text-sm shadow-xl">
-      <p className="text-slate-300 font-medium mb-2">{label}</p>
+    <div className="bg-secondary border border-primary/25 rounded-lg p-3 text-sm shadow-xl">
+      <p className="text-foreground/80 font-medium mb-2">{label}</p>
       {payload.map((p: any, i: number) => (
         <div key={i} className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full" style={{ background: p.color }} />
-          <span className="text-slate-400">{p.name}:</span>
-          <span className="text-slate-200 font-medium">{p.value}</span>
+          <span className="text-foreground/60">{p.name}:</span>
+          <span className="text-foreground font-medium">{p.value}</span>
         </div>
       ))}
     </div>
@@ -70,8 +70,8 @@ function CustomTooltip({ active, payload, label }: any) {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5 mb-6">
-      <h2 className="text-slate-200 font-semibold mb-5">{title}</h2>
+    <div className="bg-secondary/60 border border-secondary rounded-xl p-5 mb-6">
+      <h2 className="text-foreground font-semibold mb-5">{title}</h2>
       {children}
     </div>
   );
@@ -189,7 +189,7 @@ export default function TrendsPage() {
   // ── Fixed vs Open pie ──
   const fixedVsOpenData = [
     { name: "Open", value: totalOpen, color: "#f97316" },
-    { name: "Fixed", value: totalFixed, color: "#22c55e" },
+    { name: "Fixed", value: totalFixed, color: "#16a34a" },
   ].filter((d) => d.value > 0);
 
   // ── Repo stats ──
@@ -225,7 +225,7 @@ export default function TrendsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-slate-400">
+      <div className="flex items-center justify-center h-64 text-foreground/60">
         <div className="text-center">
           <div className="text-3xl mb-3 animate-pulse">📈</div>
           <p>Loading trends...</p>
@@ -236,11 +236,11 @@ export default function TrendsPage() {
 
   if (!reports.length) {
     return (
-      <div className="text-center py-24 border border-dashed border-slate-700 rounded-2xl">
+      <div className="text-center py-24 border border-dashed border-secondary rounded-2xl">
         <div className="text-5xl mb-4">📭</div>
-        <h2 className="text-xl font-semibold text-slate-300 mb-2">No data yet</h2>
-        <p className="text-slate-500 mb-4">Run some scans first to see trends.</p>
-        <Link href="/" className="text-indigo-400 hover:underline">← Back to dashboard</Link>
+        <h2 className="text-xl font-semibold text-foreground/80 mb-2">No data yet</h2>
+        <p className="text-foreground/50 mb-4">Run some scans first to see trends.</p>
+        <Link href="/" className="text-accent hover:underline">← Back to dashboard</Link>
       </div>
     );
   }
@@ -250,10 +250,10 @@ export default function TrendsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Trends</h1>
-          <p className="text-slate-400 mt-1">Track code quality over time</p>
+          <h1 className="text-3xl font-bold text-foreground">Trends</h1>
+          <p className="text-foreground/60 mt-1">Track code quality over time</p>
         </div>
-        <Link href="/" className="text-indigo-400 hover:text-indigo-300 text-sm transition-colors">
+        <Link href="/" className="text-accent hover:text-accent/80 text-sm transition-colors">
           ← All Reports
         </Link>
       </div>
@@ -261,15 +261,15 @@ export default function TrendsPage() {
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
-          { label: "Total Scans",    value: totalScans,    icon: "📊", color: "text-indigo-400" },
-          { label: "Total Findings", value: totalFindings, icon: "🔍", color: "text-slate-200"  },
-          { label: "Fixed",          value: totalFixed,    icon: "✅", color: "text-green-400"  },
+          { label: "Total Scans",    value: totalScans,    icon: "📊", color: "text-accent" },
+          { label: "Total Findings", value: totalFindings, icon: "🔍", color: "text-foreground"  },
+          { label: "Fixed",          value: totalFixed,    icon: "✅", color: "text-green-700"  },
           { label: "Fix Rate",       value: `${fixPct}%`,  icon: "📈", color: "text-blue-400"   },
         ].map((s) => (
-          <div key={s.label} className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
+          <div key={s.label} className="bg-secondary/60 border border-secondary rounded-xl p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">{s.label}</p>
+                <p className="text-foreground/60 text-sm">{s.label}</p>
                 <p className={`text-3xl font-bold mt-1 ${s.color}`}>{s.value}</p>
               </div>
               <span className="text-3xl">{s.icon}</span>
@@ -283,11 +283,11 @@ export default function TrendsPage() {
         <Section title="📈 Findings Over Time">
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={timelineData} margin={{ left: 0, right: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="date" tick={{ fill: "#64748b", fontSize: 11 }} />
-              <YAxis tick={{ fill: "#64748b", fontSize: 11 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(74 92 80 / 0.2)" />
+              <XAxis dataKey="date" tick={{ fill: "rgb(43 53 46 / 0.55)", fontSize: 11 }} />
+              <YAxis tick={{ fill: "rgb(43 53 46 / 0.55)", fontSize: 11 }} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend formatter={(v) => <span className="text-slate-300 text-xs">{v}</span>} />
+              <Legend formatter={(v) => <span className="text-foreground/80 text-xs">{v}</span>} />
               {uniqueRepos.map((repo, i) => (
                 <Line
                   key={repo}
@@ -309,13 +309,13 @@ export default function TrendsPage() {
 
         {/* Severity breakdown */}
         {severityData.length > 0 && (
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-            <h2 className="text-slate-200 font-semibold mb-4">🎯 Severity Breakdown</h2>
+          <div className="bg-secondary/60 border border-secondary rounded-xl p-5">
+            <h2 className="text-foreground font-semibold mb-4">🎯 Severity Breakdown</h2>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={severityData} margin={{ left: 0, right: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="date" tick={{ fill: "#64748b", fontSize: 10 }} />
-                <YAxis tick={{ fill: "#64748b", fontSize: 10 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(74 92 80 / 0.2)" />
+                <XAxis dataKey="date" tick={{ fill: "rgb(43 53 46 / 0.55)", fontSize: 10 }} />
+                <YAxis tick={{ fill: "rgb(43 53 46 / 0.55)", fontSize: 10 }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="critical" stackId="a" fill={SEV_COLORS.critical} />
                 <Bar dataKey="high"     stackId="a" fill={SEV_COLORS.high}     />
@@ -327,8 +327,8 @@ export default function TrendsPage() {
         )}
 
         {/* Fixed vs Open */}
-        <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-          <h2 className="text-slate-200 font-semibold mb-4">✅ Fixed vs Open</h2>
+        <div className="bg-secondary/60 border border-secondary rounded-xl p-5">
+          <h2 className="text-foreground font-semibold mb-4">✅ Fixed vs Open</h2>
           {fixedVsOpenData.length > 0 ? (
             <>
               <ResponsiveContainer width="100%" height={160}>
@@ -344,7 +344,7 @@ export default function TrendsPage() {
                     label={({ name, percent }) =>
                       `${name} ${(percent * 100).toFixed(0)}%`
                     }
-                    labelLine={{ stroke: "#475569" }}
+                    labelLine={{ stroke: "rgb(43 53 46 / 0.4)" }}
                   >
                     {fixedVsOpenData.map((entry, i) => (
                       <Cell key={i} fill={entry.color} />
@@ -352,30 +352,30 @@ export default function TrendsPage() {
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      background: "#1e293b", border: "1px solid #334155",
-                      borderRadius: 8, color: "#e2e8f0",
+                      background: "#E1E7E3", border: "1px solid rgb(74 92 80 / 0.25)",
+                      borderRadius: 8, color: "#2B352E",
                     }}
-                    itemStyle={{ color: "#e2e8f0" }}
+                    itemStyle={{ color: "#2B352E" }}
                   />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex justify-center gap-6 mt-2">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-orange-400">{totalOpen}</p>
-                  <p className="text-xs text-slate-500">Open</p>
+                  <p className="text-xs text-foreground/50">Open</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-green-400">{totalFixed}</p>
-                  <p className="text-xs text-slate-500">Fixed</p>
+                  <p className="text-2xl font-bold text-green-700">{totalFixed}</p>
+                  <p className="text-xs text-foreground/50">Fixed</p>
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-bold text-blue-400">{fixPct}%</p>
-                  <p className="text-xs text-slate-500">Fix rate</p>
+                  <p className="text-xs text-foreground/50">Fix rate</p>
                 </div>
               </div>
             </>
           ) : (
-            <p className="text-slate-500 text-sm text-center py-8">No data</p>
+            <p className="text-foreground/50 text-sm text-center py-8">No data</p>
           )}
         </div>
       </div>
@@ -384,26 +384,26 @@ export default function TrendsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 
         {/* Project summary */}
-        <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-          <h2 className="text-slate-200 font-semibold mb-4">🏆 Projects</h2>
+        <div className="bg-secondary/60 border border-secondary rounded-xl p-5">
+          <h2 className="text-foreground font-semibold mb-4">🏆 Projects</h2>
           <div className="space-y-3">
             {repoStats.map((r) => {
               const lang = getLanguageInfo(r.language);
               const trendIcon = r.trend < 0 ? "📉" : r.trend > 0 ? "📈" : "➡️";
-              const trendColor = r.trend < 0 ? "text-green-400" : r.trend > 0 ? "text-red-400" : "text-slate-400";
+              const trendColor = r.trend < 0 ? "text-green-700" : r.trend > 0 ? "text-red-400" : "text-foreground/60";
               return (
-                <div key={r.repo} className="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
+                <div key={r.repo} className="flex items-center justify-between py-2 border-b border-secondary/60 last:border-0">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="text-lg shrink-0">{lang.icon}</span>
                     <div className="min-w-0">
-                      <p className="text-slate-200 text-sm font-medium truncate">{r.repo}</p>
-                      <p className="text-slate-500 text-xs">{r.scans} scan{r.scans !== 1 ? "s" : ""}</p>
+                      <p className="text-foreground text-sm font-medium truncate">{r.repo}</p>
+                      <p className="text-foreground/50 text-xs">{r.scans} scan{r.scans !== 1 ? "s" : ""}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     <div className="text-right">
-                      <p className="text-slate-200 text-sm font-medium">{r.latest}</p>
-                      <p className="text-slate-500 text-xs">findings</p>
+                      <p className="text-foreground text-sm font-medium">{r.latest}</p>
+                      <p className="text-foreground/50 text-xs">findings</p>
                     </div>
                     {r.scans > 1 && (
                       <span className={`text-xs ${trendColor}`}>
@@ -418,8 +418,8 @@ export default function TrendsPage() {
         </div>
 
         {/* Language pie */}
-        <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-          <h2 className="text-slate-200 font-semibold mb-4">🌐 Findings by Language</h2>
+        <div className="bg-secondary/60 border border-secondary rounded-xl p-5">
+          <h2 className="text-foreground font-semibold mb-4">🌐 Findings by Language</h2>
           {languageData.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
@@ -432,7 +432,7 @@ export default function TrendsPage() {
                   dataKey="value"
                   paddingAngle={2}
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={{ stroke: "#475569" }}
+                  labelLine={{ stroke: "rgb(43 53 46 / 0.4)" }}
                 >
                   {languageData.map((_, i) => (
                     <Cell key={i} fill={langColors[i % langColors.length]} />
@@ -440,15 +440,15 @@ export default function TrendsPage() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    background: "#1e293b", border: "1px solid #334155",
-                    borderRadius: 8, color: "#e2e8f0",
+                    background: "#E1E7E3", border: "1px solid rgb(74 92 80 / 0.25)",
+                    borderRadius: 8, color: "#2B352E",
                   }}
-                  itemStyle={{ color: "#e2e8f0" }}
+                  itemStyle={{ color: "#2B352E" }}
                 />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-slate-500 text-sm text-center py-8">No data</p>
+            <p className="text-foreground/50 text-sm text-center py-8">No data</p>
           )}
         </div>
       </div>
@@ -460,19 +460,19 @@ export default function TrendsPage() {
             {topFindings.map((f, i) => {
               const fixPctItem = f.count > 0 ? Math.round((f.fixed_count / f.count) * 100) : 0;
               return (
-                <div key={i} className="flex items-center gap-3 py-2 border-b border-slate-700/50 last:border-0">
-                  <span className="text-slate-500 text-xs w-5 text-right shrink-0">{i + 1}</span>
+                <div key={i} className="flex items-center gap-3 py-2 border-b border-secondary/60 last:border-0">
+                  <span className="text-foreground/50 text-xs w-5 text-right shrink-0">{i + 1}</span>
                   <span className="text-base shrink-0">{CAT_ICONS[f.category] || "📌"}</span>
-                  <span className="text-slate-300 text-sm flex-1 min-w-0 truncate">{f.title}</span>
+                  <span className="text-foreground/80 text-sm flex-1 min-w-0 truncate">{f.title}</span>
                   <div className="flex items-center gap-2 shrink-0">
                     {/* Fix progress bar */}
-                    <div className="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                    <div className="w-16 h-1.5 bg-secondary rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-green-500 rounded-full transition-all"
+                        className="h-full bg-green-600 rounded-full transition-all"
                         style={{ width: `${fixPctItem}%` }}
                       />
                     </div>
-                    <span className="text-slate-400 text-xs w-20 text-right">
+                    <span className="text-foreground/60 text-xs w-20 text-right">
                       {f.fixed_count}/{f.count} fixed
                     </span>
                   </div>
@@ -483,7 +483,7 @@ export default function TrendsPage() {
         </Section>
       )}
 
-      <p className="text-center text-slate-600 text-xs mt-4">
+      <p className="text-center text-foreground/40 text-xs mt-4">
         {totalScans} scan{totalScans !== 1 ? "s" : ""} · {uniqueRepos.length} project{uniqueRepos.length !== 1 ? "s" : ""} · {fixPct}% fix rate
       </p>
     </div>

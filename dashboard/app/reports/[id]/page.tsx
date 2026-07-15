@@ -50,14 +50,14 @@ interface Report {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const SEV_COLORS: Record<string, string> = {
-  critical: "#ef4444", high: "#f97316", medium: "#eab308", low: "#22c55e",
+  critical: "#ef4444", high: "#f97316", medium: "#eab308", low: "#16a34a",
 };
 
 const SEV_BG: Record<string, string> = {
   critical: "bg-red-950 text-red-300 border-red-800",
   high: "bg-orange-950 text-orange-300 border-orange-800",
   medium: "bg-yellow-950 text-yellow-300 border-yellow-800",
-  low: "bg-green-950 text-green-300 border-green-800",
+  low: "bg-green-100 text-green-700 border-green-300",
 };
 
 const SEV_ICONS: Record<string, string> = {
@@ -82,10 +82,10 @@ function SeverityPie({ report, findings }: { report: Report; findings: Finding[]
   ].filter((d) => d.value > 0);
 
   return (
-    <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-      <h3 className="text-sm font-medium text-slate-300 mb-4">By Severity (open)</h3>
+    <div className="bg-secondary/60 border border-secondary rounded-xl p-5">
+      <h3 className="text-sm font-medium text-foreground/80 mb-4">By Severity (open)</h3>
       {data.length === 0 ? (
-        <div className="flex items-center justify-center h-44 text-green-400 text-sm">
+        <div className="flex items-center justify-center h-44 text-green-700 text-sm">
           ✅ All findings fixed!
         </div>
       ) : (
@@ -96,13 +96,13 @@ function SeverityPie({ report, findings }: { report: Report; findings: Finding[]
               {data.map((e, i) => <Cell key={i} fill={e.color} />)}
             </Pie>
             <Tooltip contentStyle={{
-              background: "#1e293b", border: "1px solid #334155",
-              borderRadius: 8, color: "#e2e8f0",
+              background: "#E1E7E3", border: "1px solid rgb(74 92 80 / 0.25)",
+              borderRadius: 8, color: "#2B352E",
             }}
-              labelStyle={{ color: "#e2e8f0" }}
-              itemStyle={{ color: "#e2e8f0" }}
+              labelStyle={{ color: "#2B352E" }}
+              itemStyle={{ color: "#2B352E" }}
             />
-            <Legend formatter={(v) => <span className="text-slate-300 text-xs">{v}</span>} />
+            <Legend formatter={(v) => <span className="text-foreground/80 text-xs">{v}</span>} />
           </PieChart>
         </ResponsiveContainer>
       )}
@@ -122,22 +122,22 @@ function CategoryBar({ findings }: { findings: Finding[] }) {
     .map(([cat, count]) => ({ name: `${CAT_ICONS[cat] || "📌"} ${cat}`, count }));
 
   return (
-    <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-      <h3 className="text-sm font-medium text-slate-300 mb-4">By Category (open)</h3>
+    <div className="bg-secondary/60 border border-secondary rounded-xl p-5">
+      <h3 className="text-sm font-medium text-foreground/80 mb-4">By Category (open)</h3>
       {data.length === 0 ? (
-        <div className="flex items-center justify-center h-44 text-green-400 text-sm">
+        <div className="flex items-center justify-center h-44 text-green-700 text-sm">
           ✅ All findings fixed!
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
-            <XAxis type="number" tick={{ fill: "#64748b", fontSize: 11 }} />
-            <YAxis type="category" dataKey="name" tick={{ fill: "#94a3b8", fontSize: 11 }} width={110} />
+            <XAxis type="number" tick={{ fill: "rgb(43 53 46 / 0.55)", fontSize: 11 }} />
+            <YAxis type="category" dataKey="name" tick={{ fill: "rgb(43 53 46 / 0.7)", fontSize: 11 }} width={110} />
             <Tooltip contentStyle={{
-              background: "#1e293b", border: "1px solid #334155",
-              borderRadius: 8, color: "#e2e8f0",
+              background: "#E1E7E3", border: "1px solid rgb(74 92 80 / 0.25)",
+              borderRadius: 8, color: "#2B352E",
             }} />
-            <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} />
+            <Bar dataKey="count" fill="#4A5C50" radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       )}
@@ -164,17 +164,17 @@ function FindingRow({
   }
 
   return (
-    <div className={`border-b border-slate-700/50 last:border-0 transition-opacity ${
+    <div className={`border-b border-secondary/60 last:border-0 transition-opacity ${
       finding.fixed ? "opacity-50" : ""
     }`}>
       <div
         onClick={() => setExpanded(!expanded)}
-        className="w-full text-left px-4 py-3 hover:bg-slate-700/30 transition-colors flex items-start gap-3 cursor-pointer"
+        className="w-full text-left px-4 py-3 hover:bg-secondary/40 transition-colors flex items-start gap-3 cursor-pointer"
       >
         {/* Severity badge */}
         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
           finding.fixed
-            ? "bg-slate-800 text-slate-500 border-slate-700 line-through"
+            ? "bg-secondary text-foreground/50 border-secondary line-through"
             : SEV_BG[finding.severity]
         } shrink-0 mt-0.5`}>
           {finding.fixed ? "✅" : SEV_ICONS[finding.severity]} {finding.severity}
@@ -183,18 +183,18 @@ function FindingRow({
         {/* Title + file */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-sm font-medium ${finding.fixed ? "text-slate-500 line-through" : "text-slate-200"}`}>
+            <span className={`text-sm font-medium ${finding.fixed ? "text-foreground/50 line-through" : "text-foreground"}`}>
               {finding.title}
             </span>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-foreground/50">
               {CAT_ICONS[finding.category] || "📌"} {finding.category}
             </span>
           </div>
-          <div className="text-xs text-indigo-400 mt-0.5 font-mono">
+          <div className="text-xs text-accent mt-0.5 font-mono">
             {fileName}:{finding.line}
           </div>
           {finding.fixed && finding.fixed_at && (
-            <div className="text-xs text-green-600 mt-0.5">
+            <div className="text-xs text-green-700 mt-0.5">
               Fixed {formatDate(finding.fixed_at)}
             </div>
           )}
@@ -207,13 +207,13 @@ function FindingRow({
             disabled={toggling}
             className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
               finding.fixed
-                ? "bg-slate-700 text-slate-400 border-slate-600 hover:bg-red-950 hover:text-red-300 hover:border-red-800"
-                : "bg-slate-700 text-slate-300 border-slate-600 hover:bg-green-950 hover:text-green-300 hover:border-green-800"
+                ? "bg-secondary text-foreground/60 border-secondary hover:bg-red-950 hover:text-red-300 hover:border-red-800"
+                : "bg-secondary text-foreground/80 border-secondary hover:bg-green-100 hover:text-green-700 hover:border-green-300"
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {toggling ? "..." : finding.fixed ? "↩ Reopen" : "Mark Fixed"}
           </button>
-          <span className="text-slate-500 text-xs mt-1">
+          <span className="text-foreground/50 text-xs mt-1">
             {expanded ? "▲" : "▼"}
           </span>
         </div>
@@ -221,13 +221,13 @@ function FindingRow({
 
       {expanded && !finding.fixed && (
         <div className="px-4 pb-4 ml-[88px]">
-          <div className="bg-slate-900/50 rounded-lg p-3 space-y-2">
-            <p className="text-slate-300 text-sm">{finding.description}</p>
+          <div className="bg-secondary/40 rounded-lg p-3 space-y-2">
+            <p className="text-foreground/80 text-sm">{finding.description}</p>
             <div className="flex items-start gap-2">
-              <span className="text-green-400 text-sm shrink-0">✅</span>
-              <p className="text-green-300 text-sm">{finding.suggested_fix}</p>
+              <span className="text-green-700 text-sm shrink-0">✅</span>
+              <p className="text-green-700 text-sm">{finding.suggested_fix}</p>
             </div>
-            <div className="text-xs text-slate-500 font-mono pt-1 border-t border-slate-700">
+            <div className="text-xs text-foreground/50 font-mono pt-1 border-t border-secondary">
               📄 {finding.file}:{finding.line}
             </div>
           </div>
@@ -245,19 +245,19 @@ function FixProgress({ findings }: { findings: Finding[] }) {
   const pct = total > 0 ? Math.round((fixed / total) * 100) : 0;
 
   return (
-    <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 mb-6">
+    <div className="bg-secondary/60 border border-secondary rounded-xl p-4 mb-6">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-slate-300 text-sm font-medium">Fix Progress</span>
-        <span className="text-slate-300 text-sm font-medium">{fixed} / {total} fixed ({pct}%)</span>
+        <span className="text-foreground/80 text-sm font-medium">Fix Progress</span>
+        <span className="text-foreground/80 text-sm font-medium">{fixed} / {total} fixed ({pct}%)</span>
       </div>
-      <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+      <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
         <div
-          className="h-full bg-green-500 rounded-full transition-all duration-500"
+          className="h-full bg-green-600 rounded-full transition-all duration-500"
           style={{ width: `${pct}%` }}
         />
       </div>
       {pct === 100 && (
-        <p className="text-green-400 text-xs mt-2 text-center">
+        <p className="text-green-700 text-xs mt-2 text-center">
           🎉 All findings resolved!
         </p>
       )}
@@ -358,7 +358,7 @@ export default function ReportPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-slate-400">
+      <div className="flex items-center justify-center h-64 text-foreground/60">
         <div className="text-center">
           <div className="text-3xl mb-3 animate-pulse">🔍</div>
           <p>Loading report...</p>
@@ -371,9 +371,9 @@ export default function ReportPage() {
     return (
       <div className="text-center py-24">
         <div className="text-5xl mb-4">❌</div>
-        <h2 className="text-xl font-semibold text-slate-300 mb-2">Report not found</h2>
-        <p className="text-slate-500 mb-6">{error}</p>
-        <Link href="/" className="text-indigo-400 hover:underline">← Back to dashboard</Link>
+        <h2 className="text-xl font-semibold text-foreground/80 mb-2">Report not found</h2>
+        <p className="text-foreground/50 mb-6">{error}</p>
+        <Link href="/" className="text-accent hover:underline">← Back to dashboard</Link>
       </div>
     );
   }
@@ -383,25 +383,25 @@ export default function ReportPage() {
   return (
     <div>
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
-        <Link href="/" className="hover:text-slate-300 transition-colors">Dashboard</Link>
+      <div className="flex items-center gap-2 text-sm text-foreground/50 mb-6">
+        <Link href="/" className="hover:text-foreground/80 transition-colors">Dashboard</Link>
         <span>→</span>
-        <span className="text-slate-300">{report.repo_name}</span>
+        <span className="text-foreground/80">{report.repo_name}</span>
       </div>
 
       {/* Header */}
-      <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 mb-6">
+      <div className="bg-secondary/60 border border-secondary rounded-xl p-6 mb-6">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-bold text-white">{report.repo_name}</h1>
+              <h1 className="text-2xl font-bold text-foreground">{report.repo_name}</h1>
               <span className={`text-xs px-2 py-1 rounded-full font-medium ${lang.color}`}>
                 {lang.icon} {lang.label}
               </span>
             </div>
-            <p className="text-slate-400 text-sm">{formatDate(report.scanned_at)}</p>
+            <p className="text-foreground/60 text-sm">{formatDate(report.scanned_at)}</p>
             {report.repo_path && (
-              <p className="text-slate-500 text-xs mt-1 font-mono">{report.repo_path}</p>
+              <p className="text-foreground/50 text-xs mt-1 font-mono">{report.repo_path}</p>
             )}
           </div>
           <div className="flex gap-4">
@@ -410,16 +410,16 @@ export default function ReportPage() {
                 <div className="text-2xl font-bold" style={{ color: SEV_COLORS[sev] }}>
                   {report[sev]}
                 </div>
-                <div className="text-xs text-slate-500 capitalize">{sev}</div>
+                <div className="text-xs text-foreground/50 capitalize">{sev}</div>
               </div>
             ))}
           </div>
         </div>
 
         {report.ai_summary && (
-          <div className="mt-4 pt-4 border-t border-slate-700">
-            <h3 className="text-sm font-medium text-indigo-300 mb-2">🧠 AI Analysis</h3>
-            <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-line">
+          <div className="mt-4 pt-4 border-t border-secondary">
+            <h3 className="text-sm font-medium text-accent mb-2">🧠 AI Analysis</h3>
+            <p className="text-foreground/80 text-sm leading-relaxed whitespace-pre-line">
               {report.ai_summary.substring(0, 600)}
               {report.ai_summary.length > 600 ? "..." : ""}
             </p>
@@ -439,25 +439,25 @@ export default function ReportPage() {
       )}
 
       {/* Findings table */}
-      <div className="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-700 flex flex-wrap items-center gap-3">
-          <h2 className="text-slate-200 font-semibold">
+      <div className="bg-secondary/60 border border-secondary rounded-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-secondary flex flex-wrap items-center gap-3">
+          <h2 className="text-foreground font-semibold">
             Findings
-            <span className="ml-2 text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">
+            <span className="ml-2 text-xs bg-secondary text-foreground/80 px-2 py-0.5 rounded-full">
               {filteredFindings.length} shown
             </span>
           </h2>
 
           {/* Status filter */}
-          <div className="flex rounded-lg overflow-hidden border border-slate-600">
+          <div className="flex rounded-lg overflow-hidden border border-primary/25">
             {(["all", "open", "fixed"] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
                 className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                   statusFilter === s
-                    ? "bg-indigo-600 text-white"
-                    : "bg-slate-700 text-slate-400 hover:bg-slate-600"
+                    ? "bg-primary text-background"
+                    : "bg-secondary text-foreground/60 hover:bg-secondary/70"
                 }`}
               >
                 {s === "all" ? `All (${findings.length})`
@@ -468,7 +468,7 @@ export default function ReportPage() {
           </div>
 
           <select value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)}
-            className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500">
+            className="bg-secondary border border-primary/25 text-foreground text-xs rounded-lg px-3 py-1.5 outline-none focus:border-primary">
             <option value="all">All severities</option>
             <option value="critical">🔴 Critical</option>
             <option value="high">🟠 High</option>
@@ -477,7 +477,7 @@ export default function ReportPage() {
           </select>
 
           <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500">
+            className="bg-secondary border border-primary/25 text-foreground text-xs rounded-lg px-3 py-1.5 outline-none focus:border-primary">
             <option value="all">All categories</option>
             {categories.map((cat) => (
               <option key={cat} value={cat}>{CAT_ICONS[cat] || "📌"} {cat}</option>
@@ -486,11 +486,11 @@ export default function ReportPage() {
 
           <input type="text" placeholder="🔍 Search..."
             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-slate-700 border border-slate-600 text-slate-200 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-indigo-500 ml-auto w-40" />
+            className="bg-secondary border border-primary/25 text-foreground text-xs rounded-lg px-3 py-1.5 outline-none focus:border-primary ml-auto w-40" />
         </div>
 
         {filteredFindings.length === 0 ? (
-          <div className="text-center py-12 text-slate-500">
+          <div className="text-center py-12 text-foreground/50">
             {findings.length === 0 ? "✅ No issues found — clean scan!"
               : statusFilter === "fixed" ? "No fixed findings yet"
               : statusFilter === "open" ? "🎉 All findings are fixed!"
@@ -506,7 +506,7 @@ export default function ReportPage() {
       </div>
 
       <div className="mt-6">
-        <Link href="/" className="text-indigo-400 hover:text-indigo-300 transition-colors text-sm">
+        <Link href="/" className="text-accent hover:text-accent/80 transition-colors text-sm">
           ← Back to all reports
         </Link>
       </div>

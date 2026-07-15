@@ -72,10 +72,10 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean
     <button
       onClick={() => onChange(!enabled)}
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-        enabled ? "bg-indigo-600" : "bg-slate-600"
+        enabled ? "bg-primary" : "bg-secondary"
       }`}
     >
-      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+      <span className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${
         enabled ? "translate-x-6" : "translate-x-1"
       }`} />
     </button>
@@ -86,10 +86,10 @@ function StatusBadge({ enabled }: { enabled: boolean }) {
   return (
     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
       enabled
-        ? "bg-green-950 text-green-300 border border-green-800"
-        : "bg-slate-700 text-slate-400 border border-slate-600"
+        ? "bg-green-100 text-green-700 border border-green-300"
+        : "bg-secondary text-foreground/50 border border-secondary"
     }`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${enabled ? "bg-green-400 animate-pulse" : "bg-slate-500"}`} />
+      <span className={`w-1.5 h-1.5 rounded-full ${enabled ? "bg-green-400 animate-pulse" : "bg-foreground/40"}`} />
       {enabled ? "Active" : "Paused"}
     </span>
   );
@@ -184,7 +184,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-slate-400">
+      <div className="flex items-center justify-center h-64 text-foreground/60">
         <div className="text-center">
           <div className="text-3xl mb-3 animate-pulse">⚙️</div>
           <p>Loading settings...</p>
@@ -197,7 +197,7 @@ export default function SettingsPage() {
     return (
       <div className="text-center py-24">
         <div className="text-5xl mb-4">❌</div>
-        <p className="text-slate-400">Could not load settings.</p>
+        <p className="text-foreground/60">Could not load settings.</p>
       </div>
     );
   }
@@ -207,28 +207,28 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Settings</h1>
-          <p className="text-slate-400 mt-1">Configure automated scans</p>
+          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+          <p className="text-foreground/60 mt-1">Configure automated scans</p>
         </div>
-        <Link href="/" className="text-indigo-400 hover:text-indigo-300 text-sm transition-colors">
+        <Link href="/" className="text-accent hover:text-accent/80 text-sm transition-colors">
           ← Dashboard
         </Link>
       </div>
 
       {/* ── Scan any GitHub repo ── */}
-      <div className="bg-slate-800/50 border border-indigo-500/30 rounded-xl p-6 mb-4">
+      <div className="bg-secondary/60 border border-accent/30 rounded-xl p-6 mb-4">
         <div className="flex items-center gap-2 mb-1">
-          <h2 className="text-slate-200 font-semibold">🔍 Scan a GitHub Repository</h2>
-          <span className="text-xs bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded-full">New</span>
+          <h2 className="text-foreground font-semibold">🔍 Scan a GitHub Repository</h2>
+          <span className="text-xs bg-accent/15 text-accent px-2 py-0.5 rounded-full">New</span>
         </div>
-        <p className="text-slate-400 text-sm mb-4">
+        <p className="text-foreground/60 text-sm mb-4">
           Paste any public GitHub repo URL and the AI will scan it for bugs, security issues, and code quality problems.
         </p>
 
         <div className="space-y-3">
           {/* URL input */}
           <div>
-            <label className="text-slate-300 text-xs font-medium mb-1 block">
+            <label className="text-foreground/80 text-xs font-medium mb-1 block">
               GitHub Repository URL
             </label>
             <input
@@ -240,7 +240,7 @@ export default function SettingsPage() {
                 setScanError("");
               }}
               placeholder="https://github.com/owner/repository"
-              className="w-full bg-slate-900 border border-slate-600 text-slate-200 text-sm rounded-lg px-3 py-2.5 outline-none focus:border-indigo-500 placeholder-slate-600 transition-colors"
+              className="w-full bg-background border border-primary/25 text-foreground text-sm rounded-lg px-3 py-2.5 outline-none focus:border-primary placeholder-foreground/40 transition-colors"
             />
             {scanError && (
               <p className="text-red-400 text-xs mt-1">{scanError}</p>
@@ -249,19 +249,19 @@ export default function SettingsPage() {
 
           {/* Language selector */}
           <div>
-            <label className="text-slate-300 text-xs font-medium mb-1 block">
+            <label className="text-foreground/80 text-xs font-medium mb-1 block">
               Language
             </label>
             <select
               value={repoLanguage}
               onChange={(e) => setRepoLanguage(e.target.value)}
-              className="bg-slate-900 border border-slate-600 text-slate-200 text-sm rounded-lg px-3 py-2.5 outline-none focus:border-indigo-500 w-full"
+              className="bg-background border border-primary/25 text-foreground text-sm rounded-lg px-3 py-2.5 outline-none focus:border-primary w-full"
             >
               {LANGUAGES.map((l) => (
                 <option key={l.value} value={l.value}>{l.label}</option>
               ))}
             </select>
-            <p className="text-slate-500 text-xs mt-1">
+            <p className="text-foreground/50 text-xs mt-1">
               Auto-detect works for most repos — it checks for tsconfig.json, pom.xml, *.kt files etc.
             </p>
           </div>
@@ -270,7 +270,7 @@ export default function SettingsPage() {
           <button
             onClick={handleCustomScan}
             disabled={scanning || !repoUrl.trim()}
-            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors w-full justify-center"
+            className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 disabled:bg-secondary disabled:text-foreground/50 disabled:cursor-not-allowed text-background text-sm font-medium rounded-lg transition-colors w-full justify-center"
           >
             {scanning ? (
               <>
@@ -284,19 +284,19 @@ export default function SettingsPage() {
         </div>
 
         {scanStatus === "success" && (
-          <div className="mt-3 p-3 bg-green-950 border border-green-800 rounded-lg">
-            <p className="text-green-300 text-sm font-medium">✅ Scan triggered successfully!</p>
-            <p className="text-green-400/70 text-xs mt-1">
+          <div className="mt-3 p-3 bg-green-100 border border-green-300 rounded-lg">
+            <p className="text-green-700 text-sm font-medium">✅ Scan triggered successfully!</p>
+            <p className="text-green-700/70 text-xs mt-1">
               The scan is running in GitHub Actions — it takes about 5-10 minutes.
               Results will appear on the{" "}
-              <Link href="/" className="underline hover:text-green-300">dashboard</Link>{" "}
+              <Link href="/" className="underline hover:text-green-800">dashboard</Link>{" "}
               automatically when complete.
             </p>
             <a
               href="https://github.com/Dicky59/coding-agent/actions"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-green-400 underline hover:text-green-300 mt-1"
+              className="inline-flex items-center gap-1 text-xs text-green-700 underline hover:text-green-800 mt-1"
             >
               Watch progress in GitHub Actions →
             </a>
@@ -310,11 +310,11 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Weekly scan toggle ── */}
-      <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 mb-4">
+      <div className="bg-secondary/60 border border-secondary rounded-xl p-6 mb-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-slate-200 font-semibold">Weekly Automatic Scan</h2>
-            <p className="text-slate-400 text-sm mt-1">
+            <h2 className="text-foreground font-semibold">Weekly Automatic Scan</h2>
+            <p className="text-foreground/60 text-sm mt-1">
               Automatically scan all configured repos on a schedule
             </p>
           </div>
@@ -328,8 +328,8 @@ export default function SettingsPage() {
         </div>
 
         {/* Scan day */}
-        <div className="mt-4 pt-4 border-t border-slate-700">
-          <label className="text-slate-300 text-sm font-medium">Scan day</label>
+        <div className="mt-4 pt-4 border-t border-secondary">
+          <label className="text-foreground/80 text-sm font-medium">Scan day</label>
           <div className="flex gap-2 mt-2 flex-wrap">
             {DAYS.map((day) => (
               <button
@@ -337,28 +337,28 @@ export default function SettingsPage() {
                 onClick={() => saveSettings({ scan_day: day.value })}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   settings.scan_day === day.value
-                    ? "bg-indigo-600 text-white"
-                    : "bg-slate-700 text-slate-400 hover:bg-slate-600"
+                    ? "bg-primary text-background"
+                    : "bg-secondary text-foreground/60 hover:bg-secondary/70"
                 }`}
               >
                 {day.label}
               </button>
             ))}
           </div>
-          <p className="text-slate-500 text-xs mt-2">Scans run at 8:00 AM UTC</p>
+          <p className="text-foreground/50 text-xs mt-2">Scans run at 8:00 AM UTC</p>
         </div>
 
         {/* Last / next scan */}
-        <div className="mt-4 pt-4 border-t border-slate-700 grid grid-cols-2 gap-4">
+        <div className="mt-4 pt-4 border-t border-secondary grid grid-cols-2 gap-4">
           <div>
-            <p className="text-slate-500 text-xs">Last scan</p>
-            <p className="text-slate-300 text-sm mt-0.5">
+            <p className="text-foreground/50 text-xs">Last scan</p>
+            <p className="text-foreground/80 text-sm mt-0.5">
               {settings.last_scan_at ? formatDate(settings.last_scan_at) : "Never"}
             </p>
           </div>
           <div>
-            <p className="text-slate-500 text-xs">Next scan</p>
-            <p className="text-slate-300 text-sm mt-0.5">
+            <p className="text-foreground/50 text-xs">Next scan</p>
+            <p className="text-foreground/80 text-sm mt-0.5">
               {settings.weekly_scan_enabled
                 ? settings.next_scan_at
                   ? formatDate(settings.next_scan_at)
@@ -370,9 +370,9 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Repos to scan ── */}
-      <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 mb-4">
-        <h2 className="text-slate-200 font-semibold mb-1">Repos to Scan</h2>
-        <p className="text-slate-400 text-sm mb-4">
+      <div className="bg-secondary/60 border border-secondary rounded-xl p-6 mb-4">
+        <h2 className="text-foreground font-semibold mb-1">Repos to Scan</h2>
+        <p className="text-foreground/60 text-sm mb-4">
           Choose which projects are included in automatic scans
         </p>
         <div className="space-y-2">
@@ -380,12 +380,12 @@ export default function SettingsPage() {
             const enabled = settings.scan_repos?.includes(repo.name) ?? false;
             return (
               <div key={repo.name}
-                className="flex items-center justify-between py-3 px-4 bg-slate-900/50 rounded-lg">
+                className="flex items-center justify-between py-3 px-4 bg-secondary/40 rounded-lg">
                 <div className="flex items-center gap-3">
                   <span className="text-xl">{repo.icon}</span>
                   <div>
-                    <p className="text-slate-200 text-sm font-medium">{repo.name}</p>
-                    <p className="text-slate-500 text-xs capitalize">{repo.language}</p>
+                    <p className="text-foreground text-sm font-medium">{repo.name}</p>
+                    <p className="text-foreground/50 text-xs capitalize">{repo.language}</p>
                   </div>
                 </div>
                 <Toggle enabled={enabled} onChange={() => toggleRepo(repo.name)} />
@@ -396,27 +396,27 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Manual scan ── */}
-      <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 mb-4">
-        <h2 className="text-slate-200 font-semibold mb-1">Manual Scan</h2>
-        <p className="text-slate-400 text-sm mb-4">
+      <div className="bg-secondary/60 border border-secondary rounded-xl p-6 mb-4">
+        <h2 className="text-foreground font-semibold mb-1">Manual Scan</h2>
+        <p className="text-foreground/60 text-sm mb-4">
           Trigger a scan right now for all configured repos above.
         </p>
         <button
           onClick={handleManualScan}
           disabled={triggering}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-slate-200 text-sm font-medium rounded-lg transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/70 disabled:opacity-50 disabled:cursor-not-allowed text-foreground text-sm font-medium rounded-lg transition-colors"
         >
           {triggering ? <><span className="animate-spin">⏳</span> Triggering...</> : <>🔄 Run Scan Now</>}
         </button>
 
         {triggerStatus === "success" && (
-          <div className="mt-3 flex items-center gap-2 text-green-400 text-sm">
+          <div className="mt-3 flex items-center gap-2 text-green-700 text-sm">
             <span>✅ Scan triggered!</span>
             <a
               href="https://github.com/Dicky59/coding-agent/actions"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-green-300"
+              className="underline hover:text-green-800"
             >
               Watch in GitHub Actions →
             </a>
@@ -432,7 +432,7 @@ export default function SettingsPage() {
       {/* Save toast */}
       {(saving || saved) && (
         <div className={`fixed bottom-6 right-6 px-4 py-2 rounded-lg text-sm font-medium shadow-lg ${
-          saved ? "bg-green-700 text-green-100" : "bg-slate-700 text-slate-200"
+          saved ? "bg-green-700 text-green-100" : "bg-secondary text-foreground"
         }`}>
           {saving ? "💾 Saving..." : "✅ Saved!"}
         </div>
