@@ -18,9 +18,9 @@ interface Settings {
 }
 
 const AVAILABLE_REPOS = [
-  { name: "DailyPulse", language: "kotlin", icon: "🤖" },
+  { name: "daily-pulse", language: "kotlin", icon: "🤖" },
   { name: "next-store", language: "typescript", icon: "📘" },
-  { name: "next-dicky", language: "javascript", icon: "💛" },
+  { name: "job-portal-ui", language: "javascript", icon: "💛" },
   { name: "spring-petclinic", language: "java", icon: "☕" },
   { name: "ai-coding-agent", language: "python", icon: "🐍" },
 ];
