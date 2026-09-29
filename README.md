@@ -255,9 +255,18 @@ Create `dashboard/.env.local`:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_KEY=eyJ...
-NEXT_PUBLIC_GITHUB_TOKEN=ghp_...
+NEXT_PUBLIC_SUPABASE_KEY=eyJ...        # Supabase anon/publishable key only
+GITHUB_TOKEN=github_pat_...            # server-side only, never NEXT_PUBLIC_
 ```
+
+`GITHUB_TOKEN` is used only by the server route `app/api/trigger-scan`
+to start the scan workflow, so it is never exposed to the browser.
+Use a fine-grained personal access token with:
+
+- **Repository access:** only `ai-coding-agent`
+- **Permissions:** Actions: Read and write (Metadata: Read-only is added automatically)
+
+On Vercel, add the same variables under **Project → Settings → Environment Variables**.
 
 ```bash
 npm run dev
