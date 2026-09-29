@@ -133,20 +133,50 @@ class BugFinding(BaseModel):
     description: str
     suggested_fix: str
 
+    @classmethod
+    def from_raw(cls, file_path: str, raw: dict) -> "BugFinding":
+        return cls(
+            file=file_path,
+            line=raw.get("line", 0),
+            severity=raw.get("severity", "low"),
+            category=raw.get("category", "bug"),
+            title=raw.get("title", ""),
+            description=raw.get("description", ""),
+            suggested_fix=raw.get("suggested_fix", ""),
+        )
+
+
+SEVERITY_ICONS = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🟢"}
+
 
 # ─── MCP scanner ─────────────────────────────────────────────────────────────
 
 def create_mcp_client() -> MultiServerMCPClient:
     server_path = Path(__file__).parent.parent / "mcp-server" / "server.py"
-    return MultiServerMCPClient(
-        {
-            "repo-reader": {
-                "command": "python",
-                "args": [str(server_path)],
-                "transport": "stdio",
-            }
-        }
-    )
+    server_config = {
+        "command": "python",
+        "args": [str(server_path)],
+        "transport": "stdio",
+    }
+    return MultiServerMCPClient({"repo-reader": server_config})
+
+
+def parse_tool_result(result: object) -> dict:
+    """Normalize the shapes an MCP tool result can come back as into a dict."""
+    if isinstance(result, list):
+        if not result:
+            return {}
+        first = result[0]
+        if isinstance(first, dict) and "text" in first:
+            return json.loads(first["text"])
+        if hasattr(first, "text"):
+            return json.loads(first.text)
+        return {}
+    if isinstance(result, str):
+        return json.loads(result)
+    if isinstance(result, dict):
+        return result
+    return {}
 
 
 async def call_tool(tools: list, name: str, args: dict) -> dict:
@@ -154,18 +184,7 @@ async def call_tool(tools: list, name: str, args: dict) -> dict:
     if not tool:
         return {}
     try:
-        result = await tool.ainvoke(args)
-        if isinstance(result, list) and result:
-            first = result[0]
-            if isinstance(first, dict) and "text" in first:
-                return json.loads(first["text"])
-            elif hasattr(first, "text"):
-                return json.loads(first.text)
-        if isinstance(result, str):
-            return json.loads(result)
-        if isinstance(result, dict):
-            return result
-        return {}
+        return parse_tool_result(await tool.ainvoke(args))
     except Exception:
         return {}
 
@@ -179,20 +198,11 @@ async def scan_file(tools: list, file_path: str, repo_path: str) -> list[BugFind
         "analyze_kotlin_performance",
         "analyze_kotlin_patterns",
     ]:
-        result = await call_tool(tools, tool_name, {
-            "file_path": file_path,
-            "repo_path": repo_path,
-        })
-        for f in result.get("findings", []):
-            findings.append(BugFinding(
-                file=file_path,
-                line=f.get("line", 0),
-                severity=f.get("severity", "low"),
-                category=f.get("category", "bug"),
-                title=f.get("title", ""),
-                description=f.get("description", ""),
-                suggested_fix=f.get("suggested_fix", ""),
-            ))
+        args = {"file_path": file_path, "repo_path": repo_path}
+        result = await call_tool(tools, tool_name, args)
+        findings += [
+            BugFinding.from_raw(file_path, f) for f in result.get("findings", [])
+        ]
     return findings
 
 
@@ -227,9 +237,7 @@ def format_file_comment(filename: str, findings: list[BugFinding]) -> str:
         findings, key=lambda f: severity_order.get(f.severity, 4)
     )
     for f in sorted_findings:
-        sev_icon = {
-            "critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🟢"
-        }.get(f.severity, "⚪")
+        sev_icon = SEVERITY_ICONS.get(f.severity, "⚪")
         cat_icon = {
             "security": "🔒", "bug": "🐛",
             "performance": "⚡", "pattern": "🏗️"
@@ -242,6 +250,33 @@ def format_file_comment(filename: str, findings: list[BugFinding]) -> str:
         ]
     lines.append("*Posted by AI Coding Agent*")
     return "\n".join(lines)
+
+
+def format_findings_by_category(findings: list[BugFinding]) -> list[str]:
+    """Render findings as bullet lists grouped under category headings."""
+    by_cat: dict[str, list[BugFinding]] = {}
+    for f in findings:
+        by_cat.setdefault(f.category, []).append(f)
+
+    cat_labels = {
+        "security": "🔒 Security",
+        "bug": "🐛 Bugs",
+        "performance": "⚡ Performance",
+        "pattern": "🏗️ Patterns (MVI)",
+    }
+    lines: list[str] = []
+    for cat, label in cat_labels.items():
+        items = by_cat.get(cat, [])
+        if not items:
+            continue
+        lines.append(f"**{label}** ({len(items)})")
+        lines += [
+            f"- {SEVERITY_ICONS.get(f.severity, '⚪')} "
+            f"`{Path(f.file).name}:{f.line}` — {f.title}"
+            for f in items
+        ]
+        lines.append("")
+    return lines
 
 
 def format_summary_comment(
@@ -287,30 +322,7 @@ def format_summary_comment(
         lines += ["### ✅ No issues found in changed files!", ""]
     else:
         lines += ["### All Findings", ""]
-        by_cat: dict[str, list[BugFinding]] = {}
-        for f in findings:
-            by_cat.setdefault(f.category, []).append(f)
-
-        cat_labels = {
-            "security": "🔒 Security",
-            "bug": "🐛 Bugs",
-            "performance": "⚡ Performance",
-            "pattern": "🏗️ Patterns (MVI)",
-        }
-        for cat, label in cat_labels.items():
-            items = by_cat.get(cat, [])
-            if not items:
-                continue
-            lines.append(f"**{label}** ({len(items)})")
-            for f in items:
-                sev_icon = {
-                    "critical": "🔴", "high": "🟠",
-                    "medium": "🟡", "low": "🟢"
-                }.get(f.severity, "⚪")
-                lines.append(
-                    f"- {sev_icon} `{Path(f.file).name}:{f.line}` — {f.title}"
-                )
-            lines.append("")
+        lines += format_findings_by_category(findings)
 
     lines += [
         "---",
@@ -321,6 +333,13 @@ def format_summary_comment(
 
 # ─── AI summary ───────────────────────────────────────────────────────────────
 
+AI_SUMMARY_PROMPT = (
+    "You are an expert Android/Kotlin code reviewer. "
+    "Summarize these PR review findings in 3-4 sentences. "
+    "Be specific and actionable. Focus on the most important issues."
+)
+
+
 async def generate_ai_summary(findings: list[BugFinding]) -> str:
     if not findings:
         return ""
@@ -330,18 +349,12 @@ async def generate_ai_summary(findings: list[BugFinding]) -> str:
             api_key=os.environ["ANTHROPIC_API_KEY"],
             max_tokens=512,
         )
-        summary_text = f"Total findings: {len(findings)}\n"
-        for f in findings[:10]:
-            summary_text += (
-                f"- [{f.severity}] {f.title} "
-                f"in {Path(f.file).name}:{f.line}\n"
-            )
-        response = llm.invoke([
-            SystemMessage(content=(
-                "You are an expert Android/Kotlin code reviewer. "
-                "Summarize these PR review findings in 3-4 sentences. "
-                "Be specific and actionable. Focus on the most important issues."
-            )),
+        summary_text = f"Total findings: {len(findings)}\n" + "".join(
+            f"- [{f.severity}] {f.title} in {Path(f.file).name}:{f.line}\n"
+            for f in findings[:10]
+        )
+        response = await llm.ainvoke([
+            SystemMessage(content=AI_SUMMARY_PROMPT),
             HumanMessage(content=summary_text),
         ])
         return response.content
@@ -350,6 +363,30 @@ async def generate_ai_summary(findings: list[BugFinding]) -> str:
 
 
 # ─── Main PR review flow ──────────────────────────────────────────────────────
+
+async def scan_pr_file(
+    tools: list, owner: str, repo: str, branch: str, filename: str, tmp_dir: str
+) -> list[BugFinding]:
+    """Download one PR file at the branch head and scan the whole file."""
+    content = await get_file_content(owner, repo, filename, branch)
+    if not content:
+        print(f"    ⚠️  Could not download file")
+        return []
+
+    # Write to temp file for scanner
+    local_path = Path(tmp_dir) / Path(filename).name
+    local_path.write_text(content, encoding="utf-8")
+
+    # Scan the WHOLE file (not just changed lines)
+    findings = await scan_file(tools, str(local_path), tmp_dir)
+    if findings:
+        print(f"    ⚡ {len(findings)} findings")
+
+    # Restore original GitHub filename
+    for f in findings:
+        f.file = filename
+    return findings
+
 
 async def review_pr(owner: str, repo: str, pr_number: int) -> None:
     print(f"\n🔍 PR Review Agent v2 starting...")
@@ -393,35 +430,11 @@ async def review_pr(owner: str, repo: str, pr_number: int) -> None:
     file_patches: dict[str, str] = {}
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        tmp_path = Path(tmp_dir)
-
         for i, file_info in enumerate(kotlin_files):
             filename = file_info["filename"]
-            patch = file_info.get("patch", "")
-            file_patches[filename] = patch
-
+            file_patches[filename] = file_info.get("patch", "")
             print(f"\n  [{i+1}/{len(kotlin_files)}] 🔍 {Path(filename).name}")
-
-            # Download full file content at PR branch
-            content = await get_file_content(owner, repo, filename, branch)
-            if not content:
-                print(f"    ⚠️  Could not download file")
-                continue
-
-            # Write to temp file for scanner
-            local_path = tmp_path / Path(filename).name
-            local_path.write_text(content, encoding="utf-8")
-
-            # Scan the WHOLE file (not just changed lines)
-            findings = await scan_file(tools, str(local_path), tmp_dir)
-
-            if findings:
-                print(f"    ⚡ {len(findings)} findings")
-
-            # Restore original GitHub filename
-            for f in findings:
-                f.file = filename
-
+            findings = await scan_pr_file(tools, owner, repo, branch, filename, tmp_dir)
             all_findings.extend(findings)
 
     # Step 4: Generate AI summary
@@ -470,21 +483,22 @@ async def review_pr(owner: str, repo: str, pr_number: int) -> None:
     print(f"\n📤 Posting review to GitHub (action: {action})...")
     print(f"   Inline comments: {len(inline_comments)}")
 
+    review = {
+        "commit_sha": commit_sha,
+        "body": review_body,
+        "comments": inline_comments,
+        "action": action,
+    }
+    summary = format_summary_comment(
+        all_findings, len(kotlin_files), ai_summary, action
+    )
+
     try:
         if inline_comments:
-            await post_review(
-                owner, repo, pr_number,
-                commit_sha=commit_sha,
-                body=review_body,
-                comments=inline_comments,
-                action=action,
-            )
+            await post_review(owner, repo, pr_number, **review)
             print("   ✅ Inline review posted!")
 
         # Always post summary comment
-        summary = format_summary_comment(
-            all_findings, len(kotlin_files), ai_summary, action
-        )
         await post_comment(owner, repo, pr_number, summary)
         print("   ✅ Summary comment posted!")
 
