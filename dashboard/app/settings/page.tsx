@@ -18,29 +18,31 @@ interface Settings {
 }
 
 const AVAILABLE_REPOS = [
-  { name: "DailyPulse",       language: "kotlin",     icon: "🤖" },
-  { name: "next-store",       language: "typescript",  icon: "📘" },
-  { name: "next-dicky",       language: "javascript",  icon: "💛" },
-  { name: "spring-petclinic", language: "java",        icon: "☕" },
-  { name: "coding-agent",     language: "python",      icon: "🐍" },
+  { name: "DailyPulse", language: "kotlin", icon: "🤖" },
+  { name: "next-store", language: "typescript", icon: "📘" },
+  { name: "next-dicky", language: "javascript", icon: "💛" },
+  { name: "spring-petclinic", language: "java", icon: "☕" },
+  { name: "ai-coding-agent", language: "python", icon: "🐍" },
 ];
 
 const DAYS = [
-  { value: "monday",    label: "Monday"    },
-  { value: "tuesday",   label: "Tuesday"   },
+  { value: "monday", label: "Monday" },
+  { value: "tuesday", label: "Tuesday" },
   { value: "wednesday", label: "Wednesday" },
-  { value: "thursday",  label: "Thursday"  },
-  { value: "friday",    label: "Friday"    },
+  { value: "thursday", label: "Thursday" },
+  { value: "friday", label: "Friday" },
 ];
 
 const LANGUAGES = [
-  { value: "auto",       label: "🔎 Auto-detect" },
-  { value: "typescript", label: "📘 TypeScript"  },
-  { value: "javascript", label: "💛 JavaScript"  },
-  { value: "kotlin",     label: "🤖 Kotlin"      },
-  { value: "java",       label: "☕ Java"         },
-  { value: "python",     label: "🐍 Python"      },
+  { value: "auto", label: "🔎 Auto-detect" },
+  { value: "typescript", label: "📘 TypeScript" },
+  { value: "javascript", label: "💛 JavaScript" },
+  { value: "kotlin", label: "🤖 Kotlin" },
+  { value: "java", label: "☕ Java" },
+  { value: "python", label: "🐍 Python" },
 ];
+
+const ACTIONS_URL = "https://github.com/Dicky59/ai-coding-agent/actions";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -48,21 +50,18 @@ function isValidGitHubUrl(url: string): boolean {
   return /^https:\/\/github\.com\/[\w\-]+\/[\w\-\.]+\/?$/.test(url.trim());
 }
 
+// Calls our own server route; the GitHub token never reaches the browser.
 async function triggerWorkflow(inputs: Record<string, string>): Promise<boolean> {
-  const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN || "";
-  const resp = await fetch(
-    "https://api.github.com/repos/Dicky59/coding-agent/actions/workflows/scheduled-scan.yml/dispatches",
-    {
+  try {
+    const res = await fetch("/api/trigger-scan", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github+json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ref: "main", inputs }),
-    }
-  );
-  return resp.status === 204;
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ inputs }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -71,24 +70,21 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean
   return (
     <button
       onClick={() => onChange(!enabled)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-        enabled ? "bg-primary" : "bg-secondary"
-      }`}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${enabled ? "bg-primary" : "bg-secondary"
+        }`}
     >
-      <span className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${
-        enabled ? "translate-x-6" : "translate-x-1"
-      }`} />
+      <span className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${enabled ? "translate-x-6" : "translate-x-1"
+        }`} />
     </button>
   );
 }
 
 function StatusBadge({ enabled }: { enabled: boolean }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-      enabled
-        ? "bg-green-100 text-green-700 border border-green-300"
-        : "bg-secondary text-foreground/50 border border-secondary"
-    }`}>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${enabled
+      ? "bg-green-100 text-green-700 border border-green-300"
+      : "bg-secondary text-foreground/50 border border-secondary"
+      }`}>
       <span className={`w-1.5 h-1.5 rounded-full ${enabled ? "bg-green-400 animate-pulse" : "bg-foreground/40"}`} />
       {enabled ? "Active" : "Paused"}
     </span>
@@ -168,7 +164,7 @@ export default function SettingsPage() {
       setRepoLanguage("auto");
     } else {
       setScanStatus("error");
-      setScanError("Could not trigger scan. Check that NEXT_PUBLIC_GITHUB_TOKEN is set.");
+      setScanError("Could not trigger scan. Please try again later.");
     }
     setScanning(false);
   }
@@ -293,7 +289,7 @@ export default function SettingsPage() {
               automatically when complete.
             </p>
             <a
-              href="https://github.com/Dicky59/coding-agent/actions"
+              href={ACTIONS_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-xs text-green-700 underline hover:text-green-800 mt-1"
@@ -335,11 +331,10 @@ export default function SettingsPage() {
               <button
                 key={day.value}
                 onClick={() => saveSettings({ scan_day: day.value })}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  settings.scan_day === day.value
-                    ? "bg-primary text-background"
-                    : "bg-secondary text-foreground/60 hover:bg-secondary/70"
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${settings.scan_day === day.value
+                  ? "bg-primary text-background"
+                  : "bg-secondary text-foreground/60 hover:bg-secondary/70"
+                  }`}
               >
                 {day.label}
               </button>
@@ -413,7 +408,7 @@ export default function SettingsPage() {
           <div className="mt-3 flex items-center gap-2 text-green-700 text-sm">
             <span>✅ Scan triggered!</span>
             <a
-              href="https://github.com/Dicky59/coding-agent/actions"
+              href={ACTIONS_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:text-green-800"
@@ -424,16 +419,15 @@ export default function SettingsPage() {
         )}
         {triggerStatus === "error" && (
           <p className="mt-3 text-red-400 text-sm">
-            ❌ Could not trigger scan. Check NEXT_PUBLIC_GITHUB_TOKEN in Vercel.
+            ❌ Could not trigger scan. Please try again later.
           </p>
         )}
       </div>
 
       {/* Save toast */}
       {(saving || saved) && (
-        <div className={`fixed bottom-6 right-6 px-4 py-2 rounded-lg text-sm font-medium shadow-lg ${
-          saved ? "bg-green-700 text-green-100" : "bg-secondary text-foreground"
-        }`}>
+        <div className={`fixed bottom-6 right-6 px-4 py-2 rounded-lg text-sm font-medium shadow-lg ${saved ? "bg-green-700 text-green-100" : "bg-secondary text-foreground"
+          }`}>
           {saving ? "💾 Saving..." : "✅ Saved!"}
         </div>
       )}
