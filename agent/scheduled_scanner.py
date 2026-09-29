@@ -130,7 +130,7 @@ def extract_repo_name_from_url(url: str) -> str:
 # ─── Repo config ──────────────────────────────────────────────────────────────
 
 REPO_CONFIG = {
-    "DailyPulse": (
+    "daily-pulse": (
         "/tmp/repos/DailyPulse",
         "kotlin",
         "https://github.com/Dicky59/daily-pulse",
@@ -140,20 +140,20 @@ REPO_CONFIG = {
         "typescript",
         "https://github.com/Dicky59/next-store",
     ),
-    "next-dicky": (
-        "/tmp/repos/next-dicky",
+    "job-portal-ui": (
+        "/tmp/repos/job-portal-ui",
         "javascript",
-        "https://github.com/Dicky59/next-dicky",
+        "https://github.com/Dicky59/job-portal-ui",
     ),
     "spring-petclinic": (
         "/tmp/repos/spring-petclinic",
         "java",
         "https://github.com/spring-projects/spring-petclinic",
     ),
-    "coding-agent": (
+    "ai-coding-agent": (
         "/tmp/repos/coding-agent",
         "python",
-        "https://github.com/Dicky59/coding-agent",
+        "https://github.com/Dicky59/ai-coding-agent",
     ),
 }
 
@@ -236,7 +236,7 @@ async def scan_python_repo(repo_path: str, repo_name: str) -> bool:
     try:
         sys.path.insert(0, str(Path(__file__).parent))
         from py_agent import scan_repo as py_scan
-        scan_path = f"{repo_path}/agent" if repo_name == "coding-agent" else repo_path
+        scan_path = f"{repo_path}/agent" if repo_name == "ai-coding-agent" else repo_path
         report = await py_scan(scan_path)
         print(f"  ✅ Python: {report.total_findings} findings")
         return True
