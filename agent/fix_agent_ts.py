@@ -255,7 +255,7 @@ JSON only, no markdown:"""
     time.sleep(1)
     try:
         response = claude.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-6",
             max_tokens=512,
             system=TS_FIX_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": prompt}],

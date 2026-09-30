@@ -98,7 +98,7 @@ def make_agent_node(llm_with_tools):
 
 async def build_graph(tools: list) -> Any:
     llm = ChatAnthropic(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-6",
         api_key=os.environ["ANTHROPIC_API_KEY"],
         max_tokens=4096,
     )

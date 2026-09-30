@@ -156,7 +156,7 @@ def ask_claude(system: str, prompt: str, max_tokens: int = 2048) -> str:
     time.sleep(2)
     try:
         response = anthropic.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-6",
             max_tokens=max_tokens,
             system=system,
             messages=[{"role": "user", "content": prompt}],
@@ -638,7 +638,7 @@ async def generate_language_reports(
                     for f in items[:3]:
                         summary_text += f"  - {f.get('title', '')} in {Path(f.get('file', '')).name}\n"
             resp = anthropic_client.messages.create(
-                model="claude-sonnet-4-20250514",
+                model="claude-sonnet-4-6",
                 max_tokens=512,
                 system=f"Expert {lang} code reviewer. Summarize findings in 100 words.",
                 messages=[{"role": "user", "content": summary_text}],

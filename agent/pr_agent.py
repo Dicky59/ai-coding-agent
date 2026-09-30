@@ -345,7 +345,7 @@ async def generate_ai_summary(findings: list[BugFinding]) -> str:
         return ""
     try:
         llm = ChatAnthropic(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-6",
             api_key=os.environ["ANTHROPIC_API_KEY"],
             max_tokens=512,
         )

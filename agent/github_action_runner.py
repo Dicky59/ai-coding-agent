@@ -236,7 +236,7 @@ async def generate_ai_summary(findings: list[dict], repo: str) -> str:
                     summary_text += f"  - {f['title']} in {Path(f['file']).name}:{f['line']}\n"
 
         resp = anthropic.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-6",
             max_tokens=512,
             system=(
                 "Expert Android/Kotlin reviewer. "

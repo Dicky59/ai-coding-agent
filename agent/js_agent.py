@@ -153,7 +153,7 @@ async def generate_ai_summary(findings: list[JSFinding], repo_path: str) -> str:
         return "No issues found in the repository."
     try:
         llm = ChatAnthropic(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-6",
             api_key=os.environ["ANTHROPIC_API_KEY"],
             max_tokens=1024,
         )
