@@ -121,12 +121,23 @@ export default function SettingsPage() {
 
   async function saveSettings(updates: Partial<Settings>) {
     if (!settings) return;
+    const previous = settings;
     setSaving(true);
     setSaved(false);
-    const updated = { ...settings, ...updates, updated_at: new Date().toISOString() };
-    setSettings(updated);
-    await supabase.from("settings").update(updates).eq("id", 1);
+    setSettings({ ...settings, ...updates });
+
+    const { data, error } = await supabase
+      .from("settings")
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq("id", 1)
+      .select();
+
     setSaving(false);
+    if (error || !data?.length) {
+      console.error("Failed to save settings:", error);
+      setSettings(previous); // roll back the optimistic update
+      return;
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
